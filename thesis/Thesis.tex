@@ -1,0 +1,167 @@
+% !TeX root = Thesis.tex
+\documentclass[11pt]{mimosis}
+\synctex=1
+
+% \PassOptionsToClass{14pt}{scrbook}
+\usepackage{metalogo}
+
+\usepackage{textcomp}
+\usepackage{gensymb}
+
+\usepackage[pass]{geometry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some of my favorite personal adjustments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% These are the adjustments that I consider necessary for typesetting
+% a nice thesis. However, they are *not* included in the template, as
+% I do not want to force you to use them.
+
+% This ensures that I am able to typeset bold font in table while still aligning the numbers
+% correctly.
+\usepackage{etoolbox}
+
+\usepackage[binary-units=true]{siunitx}
+\DeclareSIUnit\px{px}
+
+\sisetup{%
+  detect-all           = true,
+  detect-family        = true,
+  detect-mode          = true,
+  detect-shape         = true,
+  detect-weight        = true,
+  detect-inline-weight = math,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hyperlinks & bookmarks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[%
+  colorlinks = true,
+  citecolor  = BrickRed,
+  linkcolor  = BrickRed,
+  urlcolor   = BrickRed,
+  % pdftex,
+  pdfauthor={Guybrush Threepwood},
+  pdftitle={Reflections on the correlation between the tendency to procrastinate and the likelihood to be awarded a doctoral degree},
+  % pdfsubject={The Subject},
+  % pdfkeywords={Some Keywords},
+  % pdfproducer={Latex with hyperref, or other system},
+  % pdfcreator={pdflatex, or other tool}
+  final,
+  ]{hyperref}
+
+\usepackage{bookmark}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% I like the bibliography to be extremely plain, showing only a numeric
+% identifier and citing everything in simple brackets. The first names,
+% if present, will be initialized. DOIs and URLs will be preserved.
+
+\usepackage[%
+  autocite      = plain,
+  backend       = biber,
+  doi           = false,
+  url           = true,
+  giveninits    = true,
+  hyperref      = true,
+  maxbibnames   = 99,
+  maxcitenames  = 99,
+  sortcites     = true,
+  style         = alphabetic,
+  citestyle     = alphabetic,
+  maxalphanames = 4,           % max number of authors before it becomes [First+12]
+  backref       = true,
+  ]{biblatex}
+
+
+\input{bibliography-mimosis}
+\bibliography{Thesis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fonts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifxetexorluatex
+  %\setmainfont{Minion Pro}
+  \usepackage{microtype}
+\else
+  %\usepackage[osf,lining]{ebgaramond}  
+  \usepackage[scale=0.7]{sourcecodepro}  
+\fi
+
+
+
+
+
+
+\usepackage{mathpazo}
+\usepackage{lettrine}
+\usepackage{tikz}
+% \usepackage{minipage}
+
+\usepackage{makeidx}
+\makeindex
+
+
+
+% \newacronym[description={Principal component analysis}]{PCA}{PCA}{principal component analysis}
+% \newacronym                                            {SNF}{SNF}{Smith normal form}
+% \newacronym[description={Topological data analysis}]   {TDA}{TDA}{topological data analysis}
+
+% \makeindex
+% \makeglossaries
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Incipit
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{siunitx}
+
+\usepackage{blindtext}
+
+% Corrects \autoref{}: chapter -> Chapter, section -> Section, subsection -> Section
+\addto\extrasenglish{%
+  \renewcommand{\chapterautorefname}{Chapter}%
+  \renewcommand{\sectionautorefname}{Section}%
+  \renewcommand{\subsectionautorefname}{Section}%
+}
+
+\begin{document}
+
+\frontmatter
+  \include{Sources/Title}
+  % \include{Sources/Title_Dissertation}  % for PhD thesis
+  \pagestyle{empty}
+  \include{Sources/DeclarationOfAuthorship}  % remove for PhD thesis
+  \include{Sources/Abstract}
+  \include{Sources/Zusammenfassung}
+  \tableofcontents
+
+\mainmatter
+  \pagestyle{scrheadings}
+
+  \input{Sources/Introduction}
+  \input{Sources/RelatedWork}
+  \input{Sources/Fundamentals}
+  \input{Sources/Method}
+  \input{Sources/Implementation}
+  \input{Sources/Results}
+  \input{Sources/Conclusion}  
+
+% This ensures that the subsequent sections are being included as root
+% items in the bookmark structure of your PDF reader.
+\bookmarksetup{startatroot} 
+\backmatter
+  
+  \printbibliography
+  
+\end{document}

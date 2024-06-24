@@ -1,0 +1,32 @@
+%!TEX root = ../Thesis.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+A vector field is a space that maps to each point it contains a vector.
+There are several ways such fields can be obtained, a simple algebraic definition could be e.g. $u(x,y) = (x,y)$.
+These vector fields are called "steady" because they do not change over a period of time.
+Accordingly, time-dependent fields are reffered to as "unsteady" fields and can be defined like $u(x,y,t) = (x+t,y+t)$ or $F(x,y,z) = (-z+t, -y ,-x)$.
+For steady fields, there are several papers showing different strategies to generate streamlines according to different criteria.
+Commonly preferred attributes are high streamline length, and uniform line density, which are often labelled as "coherence".
+Both of which greatly enhance the information uptake by preventing visual clutter;
+thereby allowing a focus on more important features and characteristics of the field at hand.
+As soon as a change in the field is introduced, however, these methods are no longer optimal when examined over the entire time span.
+Therefore, we will start by introducing a new criterion termed "temporal coherence" (opposed to the aforementioned spatial coherence).
+This essentially defines how lines move through time; low coherence means a lot of movement. For a more detailed explanation, see the next section.
+The procedure outlined by this paper has a simple modus operandi:
+We start by generating a spacially coherent streamline structure for every time step using a greedy algorithm.
+Then we start walking along the generated lines, trying to find those of high temporal cohrence, and keep them.
+The others we try to optimize by moving their seeds around, or, if no sensible movement is possible, simply delete them.
+In the final step, we fill the blank spaces left by the deletion according to the chosen seeding algorithm, and are finished.
+
+\section{Problem Statement}
+Creating animations containing streamlines is difficult because streamlines are not time-coherent when generated using conventional methods described in ...
+
+\section{Proposed Solution}
+By adding the time coherence constraint, animated streamline visualizations look much better and do not introduce aritfacts etc. etc.
+
+
+
+
