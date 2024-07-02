@@ -18,11 +18,10 @@ from vtk.util import numpy_support
 import cProfile
 
 
-NEIGHBOR_DIST_RATIO = .2
-RASTER_RESOLUTION = 7
+RASTER_RESOLUTION_SCALE = 3
+HALO_RADIUS = 3
 LINE_KILL_LENGTH = 0
-LINE_START_LENGTH = 6
-INITIAL_GEN_STRIDE = 20
+LINE_START_LENGTH = 5
 TARGET_BRIGHTNESS = 1.0
 
 class Streamline:
@@ -214,8 +213,6 @@ class Oracle:
                 bx, by = self.key_gen(back_probe_spot )[:2]
                 if (0 <= bx < gridx and 0 <= by < gridy):
                     desire_back  = 2*TARGET_BRIGHTNESS - self.grid.low_pass_array[bx, by]
-                else:
-                    desire_back = 0
             if abs(desire_back) > abs(highest_desire):
                 highest_desire = desire_back
                 l = line
@@ -224,9 +221,9 @@ class Oracle:
                 highest_desire = desire_front
                 l = line
                 front = True
-        back_change = int(np.sign(highest_desire)) if front else 0
-        front_change = int(np.sign(highest_desire)) if not front else 0
-        # print(front_change, back_change)
+        back_change = int(np.sign(highest_desire)) * 3 if front else 0
+        front_change = int(np.sign(highest_desire)) * 3 if not front else 0
+        # print(front_probe_spot, back_probe_spot, front_change, back_change)
         if l is None:
             return None
         return lambda: self.grid.change_length((0, id(l)), front_change, back_change)
@@ -235,6 +232,7 @@ class Oracle:
 class COHERENCE_STRATEGY(enum.Enum):
     BIAS = 0
     MIDSEED = 1
+    COMBINED = 2
 
 
 @smproxy.filter(label="TurkBanksPathlineFilter")
@@ -260,11 +258,11 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         ##### These are also set in RequestData
         self.bounds = None
         self.rasterx, self.rastery = -1, -1
-        self.halo_radius = 1
+        self.grid_halo_radius = 1
         self.filter_scale = 1.0
         ##### Time Coherence
         self.make_coherent = False
-        self.coherence_strat:COHERENCE_STRATEGY = COHERENCE_STRATEGY.MIDSEED
+        self.coherence_strat:COHERENCE_STRATEGY = COHERENCE_STRATEGY.COMBINED
         self.last_frame_low_pass:np.ndarray = None # Needed for COHERENCE_STRATEGY.BIAS
         self.last_frame_energy:np.ndarray = None # Needed for COHERENCE_STRATEGY.BIAS
         self.midseeds:np.ndarray = None # Needed for COHERENCE_STRATEGY.MIDSEED
@@ -309,8 +307,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         inInfoObj = inInfo[0].GetInformationObject(0)
         xmin, xmax, ymin, ymax, zmin, zmax = inInfoObj.Get(SDDP.WHOLE_EXTENT())
         xsize, ysize = xmax - xmin, ymax - ymin
-        self.rasterx = xsize * RASTER_RESOLUTION
-        self.rastery = ysize * RASTER_RESOLUTION
+        self.rasterx = math.ceil((xmax - xmin) * RASTER_RESOLUTION_SCALE) + 1
+        self.rastery = math.ceil((ymax - ymin) * RASTER_RESOLUTION_SCALE) + 1
         self.bounds = vtk.vtkImageData().GetData(inInfo[0])
 
         outInfo0 = outInfo.GetInformationObject(0)
@@ -325,12 +323,6 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
 
     def RequestData(self, request:vtk.vtkInformation, inInfo:tuple[vtk.vtkInformationVector], outInfo:vtk.vtkInformationVector):
         timestep, all_timesteps = self.GetUpdateTimestep()
-        if timestep is not None and timestep == 0.0:
-            print("Reset for first frame.")
-            self.last_frame_energy = None
-            self.last_frame_low_pass = None
-            self.midseeds = None
-      
         t = time.time()
         inImageData = vtk.vtkImageData.GetData(inInfo[0])
         inImageData.SetSpacing(1,1,1)
@@ -339,34 +331,33 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         self.timeGrid.lower_bound = np.array((inImageData.GetBounds()[::2]), dtype=float)
         self.timeGrid.upper_bound = np.array((inImageData.GetBounds()[1::2]), dtype=float)
         self.timeGrid.bound_delta = self.timeGrid.upper_bound - self.timeGrid.lower_bound
-        if self.last_frame_low_pass is not None and self.coherence_strat == COHERENCE_STRATEGY.BIAS and self.make_coherent:
-            self.timeGrid.target = self.last_frame_low_pass # (self.last_frame_low_pass.clip(0,1) + self.timeGrid.target) / 2
+        if self.last_frame_low_pass is not None and\
+                self.coherence_strat in (COHERENCE_STRATEGY.BIAS, COHERENCE_STRATEGY.COMBINED) and\
+                self.make_coherent:
+            self.timeGrid.target += (self.last_frame_low_pass.clip(0, 2*TARGET_BRIGHTNESS) - TARGET_BRIGHTNESS) * .4
         self.oracle = Oracle(self.timeGrid, self.get_raster_key)
         #### Configure the output ImageData object
         outImageData = vtk.vtkImageData.GetData(outInfo.GetInformationObject(1))
         outImageData.SetDimensions(self.rasterx, self.rastery, 1)
-        outImageData.SetSpacing(*(self.timeGrid.bound_delta / (self.rasterx, self.rastery, 1)))
+        outImageData.SetSpacing(*(self.timeGrid.bound_delta / (self.rasterx - 1, self.rastery - 1, 1)))
         #### Some dials to turn. This hopefully sets them into a decent starting position.
         self.timeGrid.new_line_segment_length = self.timeGrid.get_raster_spacing()
-        self.halo_radius = min(self.rasterx, self.rastery) * NEIGHBOR_DIST_RATIO
-        self.filter_radius = math.ceil(self.halo_radius)
-        self.timeGrid.max_join_distance = self.halo_radius * self.timeGrid.get_raster_spacing() * .75
-        self.join_allowance = 6 / self.timeGrid.get_raster_spacing()
+        self.grid_halo_radius = math.floor(HALO_RADIUS / self.timeGrid.get_raster_spacing())
+        self.timeGrid.max_join_distance = HALO_RADIUS * .75
+        self.join_allowance = self.grid_halo_radius * TARGET_BRIGHTNESS * 4
         print(f"\n\n{'== Pre-Configured Settings ==':^50}")
-        print(f"{'NEIGHBOR_DIST_RATIO'  :<25}:{NEIGHBOR_DIST_RATIO :>10}")
+        print(f"{'HALO_RADIUS'          :<25}:{HALO_RADIUS         :>10}")
         print(f"{'LINE_KILL_LENGTH'     :<25}:{LINE_KILL_LENGTH    :>10}")
         print(f"{'LINE_START_LENGTH'    :<25}:{LINE_START_LENGTH   :>10}")
-        print(f"{'RASTER_RESOLUTION'    :<25}:{RASTER_RESOLUTION   :>10}")
-        print(f"{'INITIAL_GEN_STRIDE'   :<25}:{INITIAL_GEN_STRIDE  :>10}")
+        print(f"{'RASTER_RESOLUTION_SCALE' :<25}:{RASTER_RESOLUTION_SCALE :>10}")
         print(f"{'TARGET_BRIGHTNESS'    :<25}:{TARGET_BRIGHTNESS   :>10}")
         print(f"{'COHERENCE'            :<25}:{self.coherence_strat.name if self.make_coherent else 'Disabled' :>10}")
         print(f"\n{'== Auto-Configured Settings ==':^50}")
         print(f"{'Raster Size'          :<25}:" + f"{str(self.rasterx) + ' * ' + str(self.rastery):>10}")
+        print(f"{'Raster halo radius'   :<25}:{self.grid_halo_radius                :>10}")
         print(f"{'Line segment length'  :<25}:{self.timeGrid.new_line_segment_length:>10}")
-        print(f"{'Line halo radius'     :<25}:{self.halo_radius                     :>10}")
-        print(f"{'Filter halo radius'   :<25}:{self.filter_radius                   :>10}")
-        print(f"{'Max line join radius' :<25}:{self.timeGrid.max_join_distance      :>10.3f}")
         print(f"{'Line join allowance'  :<25}:{self.join_allowance                  :>10}")
+        print(f"{'Line join radius'     :<25}:{self.timeGrid.max_join_distance      :>10.3f}")
         print(f"{'': >10}{'':=>30}{'': >10}\n\n")
         
         self.filter_scale = self.get_filter_scale()
@@ -382,13 +373,14 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         outPolyData = vtk.vtkPolyData.GetData(outInfo)
         self.draw_streamlines(self.timeGrid, outPolyData)
         low_pass_data = self.timeGrid.low_pass_array
-        print("Min/Max badness:", np.min(low_pass_data), np.max(low_pass_data))
+        print("Min/Max brightness:", np.min(low_pass_data), np.max(low_pass_data))
         if self.last_frame_low_pass is not None:
             # Display the previous low-pass image if  we have one
             print("Min/Max old:", np.min(self.last_frame_low_pass), np.max(self.last_frame_low_pass))
             last_img_array = np.zeros((*self.last_frame_low_pass.shape, 3), dtype=np.uint8)
             last_img_array[:,:,0] = (self.last_frame_low_pass / 2).clip(0, 1) * 255
         print("Min/Max footprint:", np.min(self.timeGrid.footprint_array), np.max(self.timeGrid.footprint_array))
+        print("Min/Max energy:", np.min(self.timeGrid.energy_array), np.max(self.timeGrid.energy_array))
         print(f"Reached final energy {self.energy_function()} after {iterations} steps.")
         print("Lines:", len(self.timeGrid._lines))
         print(f"Reloaded after {time.time() - t:.3f}s")
@@ -402,48 +394,52 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         # current_frame_img = Image.fromarray(np.rot90(current_img_array))
         # last_frame_img.alpha_composite(current_frame_img)
         # last_frame_img.show()
+        if timestep is not None and timestep < 1e-6:
+            print("Reset for first frame.")
+            self.last_frame_energy = None
+            self.last_frame_low_pass = None
+            self.midseeds = None
+            return 1
         if self.make_coherent:
-            match self.coherence_strat:
-                case COHERENCE_STRATEGY.BIAS:
-                    pass
-                case COHERENCE_STRATEGY.MIDSEED:
-                    if self.midseeds is not None:
-                        raster_keys = self.get_raster_key(self.midseeds)[:,:2]
-                        print("Adding midpoints")
-                        summed[raster_keys[:,0], raster_keys[:,1]] = [255, 0 ,255]
-                        summed.clip(0, 255, out=summed)
-                        for seed in self.midseeds:
-                            x,y,z = self.get_raster_key(seed)
-                            point = np.array((x,y))
-                            p1 = (point - (1,1)).clip((0,0), (self.rasterx, self.rastery))
-                            p2 = (point + (1,1)).clip((0,0), (self.rasterx, self.rastery))
-                            pts = [*p1, *p2]
-                            ImageDraw.Draw(blended).ellipse(pts, fill=(255,0,255), width=2)
-                    if len(self.timeGrid._lines) > 0:
-                        self.timeGrid.shatter()
-                        self.generate_streamlines(self.timeGrid, vpi)
-                        self.midseeds = np.vstack([line.get_midpoint() for line, _ in self.timeGrid._lines.values()])
-                    else:
-                        self.midseeds = None
+            if self.coherence_strat in (COHERENCE_STRATEGY.BIAS, COHERENCE_STRATEGY.COMBINED):
+                pass
+            if self.coherence_strat in (COHERENCE_STRATEGY.MIDSEED, COHERENCE_STRATEGY.COMBINED):
+                if self.midseeds is not None:
+                    raster_keys = self.get_raster_key(self.midseeds)[:,:2]
+                    print("Adding midpoints")
+                    summed[raster_keys[:,0], raster_keys[:,1]] = [255, 0 ,255]
+                    summed.clip(0, 255, out=summed)
+                    for seed in self.midseeds:
+                        x,y,z = self.get_raster_key(seed)
+                        point = np.array((x,y))
+                        p1 = (point - (1,1)).clip((0,0), (self.rasterx, self.rastery))
+                        p2 = (point + (1,1)).clip((0,0), (self.rasterx, self.rastery))
+                        pts = [*p1, *p2]
+                        ImageDraw.Draw(blended).ellipse(pts, fill=(255,0,255), width=2)
+                if len(self.timeGrid._lines) > 0:
+                    self.timeGrid.shatter()
+                    self.generate_streamlines(self.timeGrid, vpi)
+                    self.midseeds = np.vstack([line.get_midpoint() for line, _ in self.timeGrid._lines.values()])
+                else:
+                    self.midseeds = None
         self.last_frame_low_pass = low_pass_data
         flipped = np.moveaxis(summed, (0,1), (1,0)).reshape(self.rasterx * self.rastery, 3)
         outImageData.GetPointData().SetVectors(dsa.numpyTovtkDataArray(flipped))
         # blended.save(f"/home/alba/projects/Streamlines/graphics/{timestep}.png")
         return 1
        
-    def minimize_energy(self, vpi:vtk.vtkProbeFilter, max_iterations=1000):
+    def minimize_energy(self, vpi:vtk.vtkProbeFilter, max_iterations=4000):
         grid = self.timeGrid
         iterations = 0
         self.generate_initial_streamlets(grid, vpi, self.energy_function)
-        print("Initial streamlet count | quality:", len(grid._lines), self.energy_function())
         ###### Add a bad line, this sohuld trigger discard
         # line1 = Streamline()
-        # line1.seed = np.array([1, 1, self.timeGrid.lower_bound[2]])
+        # line1.seed = np.array([5, 1, self.timeGrid.lower_bound[2]])
         # grid.update_line(0, line1)
         # line2 = Streamline()
-        # line2.seed = np.array([20.4,16, self.timeGrid.lower_bound[2]])
+        # line2.seed = np.array([10,10, self.timeGrid.lower_bound[2]])
         # grid.update_line(0, line2)
-        self.generate_streamlines(grid, vpi)
+        # self.generate_streamlines(grid, vpi)
         # print("Post-add", get_energy())
         # grid.update_footprint_array()
         # print("Pre-join:", get_energy())
@@ -456,8 +452,10 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         # grid.update_footprint_array()
         # print(energy, get_energy())
         # print("Join candidates:", grid.get_join_candidates(grid.get_raster_spacing() * 10))
-        # energy = test_energy = get_energy()
         ######
+        self.generate_streamlines(grid, vpi)
+        energy = test_energy = self.energy_function()
+        print("Initial streamlet count | quality:", len(grid._lines), self.energy_function())
         ###### Test oracle's quality
         # for i in  range(100):
         #     suggestion = self.oracle.make_suggestion()
@@ -478,22 +476,23 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         accepted = len(grid._lines)
         # return 0
         while energy > 1 and iterations < max_iterations:
-            if iterations % 50 == 0: print(iterations)
             if iterations % 2:
                 action_id = 3
-                self.oracle.make_suggestion()()
-                reset_action = lambda: self.timeGrid.reject()
+                action = self.oracle.make_suggestion()
+                if action is not None:
+                    action()
+                    reset_action = lambda: self.timeGrid.reject()
             else:
-                # action_id = 2
+                # action_id = 3
                 action_id = np.random.choice(len(random_actions), replace=True)
-                # action_id = np.random.choice([2,3,4], replace=True)
+                # action_id = np.random.choice([1,2,3,4], replace=True)
                 action = random_actions[action_id]
                 reset_action = action(grid)  #track how to undo the change we just executed
             self.generate_streamlines(grid, vpi)
             test_energy = self.energy_function()
             allowance = 0
-            if action_id == 4: allowance = self.join_allowance
-            if test_energy - allowance < energy:
+            if action_id == 4: allowance = self.join_allowance * 2
+            if iterations % 2 or test_energy - allowance < energy:
                 # print("Accepted change.", test_energy, energy)
                 grid.accept()
                 accepted += 1
@@ -502,8 +501,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
             elif reset_action is not None: #if the change gets discarded, try to undo it
                 # print("Bad energy (", test_energy, "<=", energy, "). Undid last action.")
                 rejected += 1
-                # if iterations % 2:
-                #     rejected_oracles += 1
+                if iterations % 2:
+                    rejected_oracles += 1
                 reset_action()
             iterations += 1
         print(f"Reject vs accept: ({rejected} vs {accepted}). Oracle rejctions: {rejected_oracles}")
@@ -519,8 +518,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
             gridx, gridy = grid.footprint_array.shape
             lo_x, lo_y, lo_z = self.timeGrid.lower_bound
             hi_x, hi_y, hi_z = self.timeGrid.upper_bound
-            xvals = np.linspace(lo_x, hi_x - .00001, math.ceil(gridx / INITIAL_GEN_STRIDE))
-            yvals = np.linspace(lo_y, hi_y - .00001, math.ceil(gridy / INITIAL_GEN_STRIDE))
+            xvals = np.linspace(lo_x, hi_x - .00001, math.ceil(self.rasterx / self.grid_halo_radius))
+            yvals = np.linspace(lo_y, hi_y - .00001, math.ceil(self.rastery / self.grid_halo_radius))
             xyzgenerator = itertools.product(xvals, yvals, [lo_z])
         for x,y,z in xyzgenerator:
             line = Streamline()
@@ -642,18 +641,18 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         return vecs / np.asmatrix(np.linalg.norm(vecs, axis=1)).T
 
     def get_filter_scale(self):
-        radius = self.filter_radius
-        sigma = radius / 3.8
+        radius = self.grid_halo_radius
+        sigma = radius / 3
         filter_size = 1 + radius * 2
         arr = np.zeros((filter_size, filter_size), dtype=float)
         arr[:, radius] = 1.0
-        center_value = scipy.ndimage.gaussian_filter(arr * sigma, sigma, radius=radius, mode='constant')[radius, radius]
-        return  1.4 / center_value
+        center_value = scipy.ndimage.gaussian_filter(arr, sigma, radius=radius, mode='constant')[radius, radius]
+        return  TARGET_BRIGHTNESS * 1.5 / center_value
 
     def low_pass_filter(self, arr:np.ndarray, out:np.ndarray):
-        radius = self.filter_radius
-        sigma = radius / 3.8
-        scipy.ndimage.gaussian_filter(arr * sigma, sigma, radius=radius, output=out, mode='constant')
+        radius = self.grid_halo_radius
+        sigma = radius / 3
+        scipy.ndimage.gaussian_filter(arr, sigma, radius=radius, output=out, mode='constant')
         np.multiply(out, self.filter_scale, out=out)
     
     def energy_array(self, arr:np.ndarray, out:np.ndarray):
@@ -697,7 +696,7 @@ def _change_length(grid:TimeGrid):
     if key := _get_random_line_key(grid):
         line = grid._lines[key][0]
         # prev_len = line.length
-        grid.change_length(key, np.random.choice([-1,1]), np.random.choice([-1,1]))
+        grid.change_length(key, np.random.choice(10) - 5, np.random.choice(10) - 5)
         # print(f"Changed length of {id(line)}: {prev_len} -> {line.length}")
         return lambda: grid.reject()
     return None
