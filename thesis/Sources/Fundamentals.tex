@@ -2,8 +2,56 @@
 \chapter{Fundamentals}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Vector Fields}
+A vector field represents how vectorized elements act over a spatial domain.
+Intuitively, this means that for every point in a domain we can obtain the force that acts at that point.
+
 \subsection{Definitions}
+More formally, a vector field can be defined as a map from a domain of points to a vector.
+We can write it as an $n$-$m$-valued function, mapping an $n$-dimensional input to an $m$-dimensional output.
+In this thesis, we will only care about cases of $n=m$ in two and three dimensions.
+
+There are several ways such fields can be obtained, a simple algebraic definition could be e.g. $u(x,y) = (1,0)$.
+This gives us a field that represents a force of magnitude one towards positive $x$ and no influence on the $y$ component.
+
+If we want our force to not only depend on spacial input, but also on another scalar like a time component, we write this as $u(x,y,t)$.
+
+Vector fields are called \textit{steady} if they do not have a time component, otherwise they are referred to as \textit{unsteady}.
+Another distinction is \textit{continuity}, this is the same as the algebraic definition for other functions.
+The fields in this paper are all going to be continuous.
+
 \subsection{Critical Points}
+A vector field can have points with special characteristics, called critical points.
+In the 2D case, there are only four commonly used critical points:
+\begin{itemize}
+    \item \b{Source}:
+    Given a field such as $u(x,y) = (x,y)$, we can see that to every point applies a force away from the origin.
+    If we think about this as the flow of a liquid, then this would mean that (in the case of noncompressible flow) liquid is \textit{created} at the point $(0,0)$.
+    We therefore refer to such a point as a \textit{source}.
+    \item \b{Sink}:
+    Similarly, $u(x,y) = (-x,-y)$ would give us a \textit{sink} at $(0,0)$, essentially destroying liquid.
+    \item \b{Saddle}:
+    A saddle is an area where liquid is compressed in one direction, and stretched in another, e.g. by $u(x,y) = (-x,y)$
+    \item \b{Periodic orbit}:
+    $u(x,y) = (-y,x)$ creates circular paths around the origin, where after travelling a distance of $2\pi r$ you will end up at the point you started with.
+    These critical points are therefore called \textit{periodic orbits}.
+\end{itemize}
+
 \section{Streamlines}
+Given a vector field $u$ and a point $P$, we can trace the movement of this point through $u$ by integrating over the field.
+Intuitively, we just step through the field by choosing the next point $P_n = P_{n-1} + c * u(P_{n-1})$, with $c$ being a step size scale.
+If we do this an infinte number of times with positive and negative values for $c$,
+we end up with a set of points $S$ we have passed through, which defines the streamline.
+$S$ has two notable properties:
+\begin{itemize}
+    \item For every point $P$ inside this set, the direction of its derivative is equal to $u(P)$.
+    This means that the streamline is tangent to the vector field at every points.
+    \item No matter which point inside $S$ we use as $P_0$, we will always obtain the same set $S$ as its streamline.
+\end{itemize}
+Any point inside $S$ is referred to as a \textit{seed}, yielding the streamline $S$.
+
 \subsection{Spatial Coherence}
+If we want to visualize a vector field, we want its features to be easily identifiable.
+At the same time, we do not want to introduce distractions or artifacts due to the visualization technique.
+Deciding factors of uniformity in streamline visualization are streamline length and density.
+Longer streamlines make for a smoother appearance, whereas many short lines tend to obfuscate and hinder recognition of important features like critical points.
 \subsection{Maybe Temporal Coherence?}

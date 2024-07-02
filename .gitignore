@@ -1,3 +1,15 @@
 graphics
 animations
 HotRoom2D
+*.pyc
+scrapped
+
+### Latex stuff
+*.aux
+*.blg
+*.fls
+*.log
+*.toc
+*.fdb_latexmk
+*.synctex.gz
+thesis/Thesis.aux
