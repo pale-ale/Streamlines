@@ -8,20 +8,22 @@ For steady fields, there are several papers showing different strategies to gene
 Commonly preferred attributes are high streamline length, and uniform line density, which are often labelled as "coherence".
 Both of which greatly enhance the information uptake by preventing visual clutter;
 thereby allowing a focus on more important features and characteristics of the field at hand.
-As soon as a change in the field is introduced, however, these methods are no longer optimal when examined over the entire time span.
-Therefore, we will start by introducing a new criterion termed "temporal coherence" (opposed to the aforementioned spatial coherence).
-This essentially defines how lines move through time; low coherence means a lot of movement. For a more detailed explanation, see the next section.
-The procedure outlined by this paper has a simple modus operandi:
-We start by generating a spacially coherent streamline structure for every time step using a greedy algorithm.
-Then we start walking along the generated lines, trying to find those of high temporal cohrence, and keep them.
-The others we try to optimize by moving their seeds around, or, if no sensible movement is possible, simply delete them.
-In the final step, we fill the blank spaces left by the deletion according to the chosen seeding algorithm, and are finished.
 
 \section{Problem Statement}
-Creating animations containing streamlines is difficult because streamlines are not time-coherent when generated using conventional methods described in ...
+As soon as a change in the field is introduced, however, these methods are no longer optimal when examined over the entire time span.
+This is a direct consequence of the streamline generation technique only giving optimal placement w.r.t a single frame.
+If we introduce multiple time-frames and small, localized changes to the field, it is unlikely that similar lines will be chosen or preferred.
+This causes lines to move about and shift between frames a lot more than the time-induced changes would warrant.
+The sporadic movement makes it very difficult to perceive the way the lines would actually move due to the field changing.
+Therefore, creating an animation of an unsteady vector field's behavior is very difficult, time-consuming, and requires a lot of human intervention.
 
 \section{Proposed Solution}
-By adding the time coherence constraint, animated streamline visualizations look much better and do not introduce aritfacts etc. etc.
+We define a criterion called "time coherence", mainly referring to how streamlines move on a frame-by-frame basis. 
+For a more detailed explanation of the approach, see the next section.
+
+Since this is mostly a problem of visual fidelity, we choose an image-based streamline generation algorithm,
+which we then extend to include the time coherence constraint. 
+By extending it in this way, animated streamline visualizations look much better and introduce a lot less artifacts.
 
 
 

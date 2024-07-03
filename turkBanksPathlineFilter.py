@@ -57,8 +57,8 @@ class TimeGrid:
         self.footprint_array = np.zeros(array_shape, dtype=float)
         self.low_pass_array = np.zeros(array_shape, dtype=float)
         self.energy_array = np.zeros(array_shape, dtype=float)
-        self.target = np.ndarray(array_shape, dtype=float)
-        self.target.fill(TARGET_BRIGHTNESS)
+        self.energy_target = np.ndarray(array_shape, dtype=float)
+        self.energy_target.fill(TARGET_BRIGHTNESS)
         self.key_gen = key_gen
         self._on_reject = None
         self.lower_bound:np.ndarray = None
@@ -264,7 +264,6 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         self.make_coherent = False
         self.coherence_strat:COHERENCE_STRATEGY = COHERENCE_STRATEGY.COMBINED
         self.last_frame_low_pass:np.ndarray = None # Needed for COHERENCE_STRATEGY.BIAS
-        self.last_frame_energy:np.ndarray = None # Needed for COHERENCE_STRATEGY.BIAS
         self.midseeds:np.ndarray = None # Needed for COHERENCE_STRATEGY.MIDSEED
     
     def FillOutputPortInformation(self, port, info):
@@ -331,10 +330,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         self.timeGrid.lower_bound = np.array((inImageData.GetBounds()[::2]), dtype=float)
         self.timeGrid.upper_bound = np.array((inImageData.GetBounds()[1::2]), dtype=float)
         self.timeGrid.bound_delta = self.timeGrid.upper_bound - self.timeGrid.lower_bound
-        if self.last_frame_low_pass is not None and\
-                self.coherence_strat in (COHERENCE_STRATEGY.BIAS, COHERENCE_STRATEGY.COMBINED) and\
-                self.make_coherent:
-            self.timeGrid.target += (self.last_frame_low_pass.clip(0, 2*TARGET_BRIGHTNESS) - TARGET_BRIGHTNESS) * .4
+        
+        #    self.timeGrid.target += (self.last_frame_low_pass.clip(0, 2*TARGET_BRIGHTNESS) - TARGET_BRIGHTNESS) * .4
         self.oracle = Oracle(self.timeGrid, self.get_raster_key)
         #### Configure the output ImageData object
         outImageData = vtk.vtkImageData.GetData(outInfo.GetInformationObject(1))
@@ -396,7 +393,6 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         # last_frame_img.show()
         if timestep is not None and timestep < 1e-6:
             print("Reset for first frame.")
-            self.last_frame_energy = None
             self.last_frame_low_pass = None
             self.midseeds = None
             return 1
@@ -456,22 +452,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         self.generate_streamlines(grid, vpi)
         energy = test_energy = self.energy_function()
         print("Initial streamlet count | quality:", len(grid._lines), self.energy_function())
-        ###### Test oracle's quality
-        # for i in  range(100):
-        #     suggestion = self.oracle.make_suggestion()
-        #     if suggestion is None:
-        #         print("none suggestion?")
-        #         continue
-        #     energy = get_energy()
-        #     suggestion()
-        #     self.generate_streamlines(grid, vpi)
-        #     if energy < get_energy():
-        #         print("bad oracle!")
-        #     self.timeGrid.accept()
-        # print(line1.backward_segments, line1.forward_segments)
         rejected = 0
         rejected_oracles = 0
-        # self.generate_streamlines(grid, vpi)
         energy = self.energy_function()
         accepted = len(grid._lines)
         # return 0
@@ -572,7 +554,7 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
             print("Destroyed line")
             self.timeGrid._lines.pop(key)
         grid.update_footprint_array()
-        self.low_pass_filter(grid.footprint_array, grid.low_pass_array)
+        self.gauss_filter(grid.footprint_array, grid.low_pass_array)
         self.energy_array(grid.low_pass_array, grid.energy_array)
 
     def generate_streamline_single(self, line:Streamline, segmentsize:float, vpi:vtk.vtkImageProbeFilter, bounds:tuple):
@@ -649,17 +631,38 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         center_value = scipy.ndimage.gaussian_filter(arr, sigma, radius=radius, mode='constant')[radius, radius]
         return  TARGET_BRIGHTNESS * 1.5 / center_value
 
-    def low_pass_filter(self, arr:np.ndarray, out:np.ndarray):
+    def gauss_filter(self, arr:np.ndarray, out:np.ndarray):
         radius = self.grid_halo_radius
+        ### gaussian low pass
         sigma = radius / 3
         scipy.ndimage.gaussian_filter(arr, sigma, radius=radius, output=out, mode='constant')
         np.multiply(out, self.filter_scale, out=out)
     
+    def hermite_filter(self, arr:np.ndarray, out:np.ndarray):
+        # WIP, do not use.
+        radius = self.grid_halo_radius
+        ### cubic hermite low pass
+        if self.filter is None:
+            dim = 2 * radius + 1
+            xs, ys = np.arange(-radius, radius + 1), np.arange(-radius, radius + 1)
+            self.filter = (np.sqrt(xs[:,None] ** 2 + ys[None, :] ** 2) / radius).clip(0, 1.0)
+            self.filter = 2 * self.filter ** 3 - 3 * self.filter ** 2 + 1
+    
     def energy_array(self, arr:np.ndarray, out:np.ndarray):
-        return np.square(arr - self.timeGrid.target, out=out)
+        ### The energy compared to our constant grayscale target
+        return np.square(arr - self.timeGrid.energy_target, out=out)
     
     def energy_function(self) -> float:
-        return np.sum(self.timeGrid.energy_array)
+        tc_factor = .5
+        # assert 0 <= tc_factor <= 1.0
+        if self.last_frame_low_pass is not None and\
+                self.coherence_strat in (COHERENCE_STRATEGY.BIAS, COHERENCE_STRATEGY.COMBINED) and\
+                self.make_coherent:
+            incoherence = np.square(self.last_frame_low_pass - self.timeGrid.low_pass_array)
+            total_energy = (1 - tc_factor) * self.timeGrid.energy_array + tc_factor * incoherence
+        else:
+            total_energy = self.timeGrid.energy_array
+        return np.sum(total_energy)
 
     def inside_domain(self, point):
         arr = (self.timeGrid.lower_bound <= point) & (point <= self.timeGrid.upper_bound)
