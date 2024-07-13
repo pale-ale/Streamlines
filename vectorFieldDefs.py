@@ -13,7 +13,7 @@ class VectorFieldBase():
 
 
 class StraightVectorField(VectorFieldBase):
-    def __init__(self, direction: ndarray) -> None:
+    def __init__(self) -> None:
         self.direction = np.array([1.0, 0.0, 0.0])
     
     @property
@@ -81,19 +81,33 @@ class SinkVectorField(VectorFieldBase):
         self._interp = scipy.interpolate.interp1d(np.arange(2), np.array([self._sink_start_position, self._sink_stop_position]).T)
 
 
-class AsymptoticSinkVectorField(VectorFieldBase):
-    _sink_position = np.zeros(3, dtype=float)
+class DoubleOrbitVectorField(VectorFieldBase):
+    _center_position_1 = np.zeros(3, dtype=float)
+    _center_position_2 = np.array([0,10,0], dtype=float)
 
-    def get_vector(self, ps: ndarray) -> ndarray:
-        direction = self._sink_position - ps
-        dist_inv_sq = (1 / np.linalg.norm(direction, axis=1)) ** 2
-        return np.nan_to_num(direction * dist_inv_sq[:,None])
+    def get_vector(self, ps: ndarray, t:float) -> ndarray:
+        deltas1 = ps - self._center_position_1
+        dists1 = np.linalg.norm(deltas1, axis=-1)[:,None] ** 2
+        deltas2 = ps - self._center_position_2
+        dists2 = np.linalg.norm(deltas2, axis=-1)[:,None] ** 2
+        rot1 = deltas1 @ ((0,1,0), (-1,0,0), (0,0,1))
+        rot2 = deltas2 @ ((0,-1,0), (1,0,0), (0,0,1))
+        return rot1 / dists1 + rot2 / dists2
 
     @property
-    def sink_position(self) -> ndarray:
-        return self._sink_position
+    def center_position_1(self) -> ndarray:
+        return self._center_position_1
     
-    @sink_position.setter
-    def sink_position(self, new_sink_position: ndarray):
-        assert new_sink_position.shape == (3,), "Sink position must be a (3,)-ndarray but is of shape %s" % str(new_sink_position.shape)
-        self._sink_position = new_sink_position
+    @property
+    def center_position_2(self) -> ndarray:
+        return self._center_position_2
+    
+    @center_position_1.setter
+    def center_position_1(self, new_center_position: ndarray):
+        assert new_center_position.shape == (3,), "Center position must be a (3,)-ndarray but is of shape %s" % str(new_center_position.shape)
+        self._center_position_1 = new_center_position
+
+    @center_position_2.setter
+    def center_position_2(self, new_center_position: ndarray):
+        assert new_center_position.shape == (3,), "Center position must be a (3,)-ndarray but is of shape %s" % str(new_center_position.shape)
+        self._center_position_2 = new_center_position

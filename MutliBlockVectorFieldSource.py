@@ -1,6 +1,5 @@
 from vtkmodules.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vectorFieldDefs import VectorFieldBase
-from vectorFieldDefs import SinkVectorField
 from vtkmodules.numpy_interface import dataset_adapter as dsa
 from paraview.util.vtkAlgorithm import smproxy, smproperty
 
@@ -50,15 +49,6 @@ class VectorFieldSourceBase(VTKPythonAlgorithmBase):
         )
         return 1
 
-    # def RequestData(self, request: vtk.vtkInformation, inInfo: vtk.vtkInformationVector, outInfo: vtk.vtkMultiBlockDataSet):
-    #     multiBlock: vtk.vtkMultiBlockDataSet = dsa.WrapDataObject(
-    #         vtk.vtkMultiBlockDataSet.GetData(outInfo))
-    #     self.prepare_data(multiBlock)
-    #     for timestep in self.timestep_generator():
-    #         self.consume_timestep(timestep, multiBlock)
-    #     self.finalize_data(multiBlock)
-    #     return 1
-
     def _generate_points(self) -> np.ndarray:
         bz, by, bx = self._get_bounds_constrained()
         dz, dy, dx = self._get_dimensions_constrained()
@@ -82,33 +72,75 @@ class VectorFieldSourceBase(VTKPythonAlgorithmBase):
         raise NotImplementedError()
 
 
+@smproxy.source(label="Straight Vector Field Source")
+@smproperty.input(name="Input")
+class StraightVectorFieldSource(VectorFieldSourceBase):
+    def __init__(self):
+        from vectorFieldDefs import StraightVectorField
+        super().__init__(StraightVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
+        self._vectorFieldDef: StraightVectorField
+    
+    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
+    def SetBounds(self, x, y, z):
+        self._bounds = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
+    def SetDimensions(self, x, y, z):
+        self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.xml("""
+    <IntVectorProperty name="PadData"
+        label="Constrain to XY-Plane"
+        command="SetConstrainTo2D"
+        number_of_elements="1"
+        default_values="1">
+        <BooleanDomain name="bool" />
+    </IntVectorProperty>
+    """)
+    def SetConstrainTo2D(self, val):
+        '''Set attribute to signal whether data should be padded when RequestData is called
+        '''
+        self.constrain_to_2d = bool(val)
+        self.points = self._generate_points()
+        self.Modified()
+    
+    def timestep_generator(self):
+        yield [0]
+
+
+
 @smproxy.source(label="Moving Sink Vector Field Source")
 @smproperty.input(name="Input")
 class MovingSinkVectorFieldSource(VectorFieldSourceBase):
     def __init__(self):
+        from vectorFieldDefs import SinkVectorField
         super().__init__(SinkVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
         self._vectorFieldDef: SinkVectorField
         self._vectorFieldDef.sink_start_position = np.array([0.0, 0.5, 0.5])
         self._vectorFieldDef.sink_stop_position = np.array([1.0, 0.5, 0.5])
         self.steps = 1
     
-    @smproperty.doublevector(Name="Sink Start", default_values=[0.0, 0.5, 0.5])
+    @smproperty.doublevector(Name="Sink Start", default_values=[0.0, 0.0, 0.0])
     def SetSinkStart(self, x, y, z):
         self._vectorFieldDef.sink_start_position = np.array([x,y,z])
         self.Modified()
 
-    @smproperty.doublevector(Name="Sink Stop", default_values=[1.0, 0.5, 0.5])
+    @smproperty.doublevector(Name="Sink Stop", default_values=[1.0, 0.0, 0.0])
     def SetSinkStop(self, x, y, z):
         self._vectorFieldDef.sink_stop_position = np.array([x,y,z])
         self.Modified()
     
-    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 1.0])
+    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
     def SetBounds(self, x, y, z):
         self._bounds = np.array([x,y,z])
         self.points = self._generate_points()
         self.Modified()
     
-    @smproperty.intvector(Name="Dimensions", default_values=[10, 10, 10])
+    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
     def SetDimensions(self, x, y, z):
         self._dimensions = np.array([x,y,z])
         self.points = self._generate_points()
@@ -137,3 +169,54 @@ class MovingSinkVectorFieldSource(VectorFieldSourceBase):
     
     def timestep_generator(self):
         yield from enumerate(np.linspace(self._vectorFieldDef.sink_start_position, self._vectorFieldDef.sink_stop_position, self.steps))
+
+
+@smproxy.source(label="Double Orbit Vector Field Source")
+@smproperty.input(name="Input")
+class DoubleOrbitVectorFieldSource(VectorFieldSourceBase):
+    def __init__(self):
+        from vectorFieldDefs import DoubleOrbitVectorField
+        super().__init__(DoubleOrbitVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
+        self._vectorFieldDef: DoubleOrbitVectorField
+    
+    @smproperty.doublevector(Name="Center 1", default_values=[0.0, 0.0, 0.0])
+    def SetCenter1(self, x, y, z):
+        self._vectorFieldDef.center_position_1 = np.array([x,y,z])
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Center 2", default_values=[0.0, 10.0, 0.0])
+    def SetCenter2(self, x, y, z):
+        self._vectorFieldDef.center_position_2 = np.array([x,y,z])
+        self.Modified()
+
+    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
+    def SetBounds(self, x, y, z):
+        self._bounds = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
+    def SetDimensions(self, x, y, z):
+        self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.xml("""
+    <IntVectorProperty name="PadData"
+        label="Constrain to XY-Plane"
+        command="SetConstrainTo2D"
+        number_of_elements="1"
+        default_values="1">
+        <BooleanDomain name="bool" />
+    </IntVectorProperty>
+    """)
+    def SetConstrainTo2D(self, val):
+        '''Set attribute to signal whether data should be padded when RequestData is called
+        '''
+        self.constrain_to_2d = bool(val)
+        self.points = self._generate_points()
+        self.Modified()
+    
+    def timestep_generator(self):
+        yield [0]
+
