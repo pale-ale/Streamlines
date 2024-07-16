@@ -112,7 +112,6 @@ class StraightVectorFieldSource(VectorFieldSourceBase):
         yield [0]
 
 
-
 @smproxy.source(label="Moving Sink Vector Field Source")
 @smproperty.input(name="Input")
 class MovingSinkVectorFieldSource(VectorFieldSourceBase):
@@ -179,23 +178,29 @@ class DoubleOrbitVectorFieldSource(VectorFieldSourceBase):
         super().__init__(DoubleOrbitVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
         self._vectorFieldDef: DoubleOrbitVectorField
     
-    @smproperty.doublevector(Name="Center 1", default_values=[0.0, 0.0, 0.0])
+    @smproperty.doublevector(Name="Center 1", default_values=[.8, .8, 0.0])
     def SetCenter1(self, x, y, z):
         self._vectorFieldDef.center_position_1 = np.array([x,y,z])
         self.Modified()
     
-    @smproperty.doublevector(Name="Center 2", default_values=[0.0, 10.0, 0.0])
+    @smproperty.doublevector(Name="Center 2", default_values=[0.2, 0.8, 0.0])
     def SetCenter2(self, x, y, z):
         self._vectorFieldDef.center_position_2 = np.array([x,y,z])
         self.Modified()
+    
+    @smproperty.doublevector(Name="Smoothing distance", default_values=[1.0])
+    def SetSmoothDist(self, dist:float):
+        self._vectorFieldDef.dist = dist
+        self.points = self._generate_points()
+        self.Modified()
 
-    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
+    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 0.0])
     def SetBounds(self, x, y, z):
         self._bounds = np.array([x,y,z])
         self.points = self._generate_points()
         self.Modified()
     
-    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
+    @smproperty.intvector(Name="Dimensions", default_values=[21, 21, 1])
     def SetDimensions(self, x, y, z):
         self._dimensions = np.array([x,y,z])
         self.points = self._generate_points()
