@@ -4,27 +4,39 @@
 \chapter{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-For steady fields, there are several papers showing different strategies to generate streamlines according to different criteria.
-Commonly preferred attributes are high streamline length, and uniform line density, which are often labelled as "coherence".
-Both of which greatly enhance the information uptake by preventing visual clutter;
-thereby allowing a focus on more important features and characteristics of the field at hand.
+The visualization of vector fields is a heavily used component in many fields like aerospace engineering, geology, fluid dynamics, material science, or the biomedical sector.
+They play an important role in many design processes, and facilitate the understanding of material dynamics.
+Common examples are weather systems, rotor design, analysis of marker movement inside of cells, or the magnetic field of a star.
+Displaying such fields in a palpable way is an important part in understanding the underlying dynamics and allows for better analysis of the data.
 
-\section{Problem Statement}
-As soon as a change in the field is introduced, however, these methods are no longer optimal when examined over the entire time span.
-This is a direct consequence of the streamline generation technique only giving optimal placement w.r.t a single frame.
-If we introduce multiple time-frames and small, localized changes to the field, it is unlikely that similar lines will be chosen or preferred.
-This causes lines to move about and shift between frames a lot more than the time-induced changes would warrant.
-The sporadic movement makes it very difficult to perceive the way the lines would actually move due to the field changing.
-Therefore, creating an animation of an unsteady vector field's behavior is very difficult, time-consuming, and requires a lot of human intervention.
+Contemporary research is mostly limited to continuous and steady vector fields, making animation of unsteady fields very difficult.
+Lines are usually optimized with respect to a single frame, which in turn has a very pleasing appearance.
+If we introduce and small, localized changes to the field, it is unlikely that similar lines will be chosen or preferred.
+This causes lines to move about and shift between frames a lot more than the time-induced changes to the field would warrant.
+The sporadic movement makes it very difficult to perceive the flow change of the field.
+Therefore, creating an animation of an unsteady vector field's behavior is very difficult,
+time-consuming, and requires a lot of human intervention in order to achieve good results.
+This is extremely limiting, as most (if not all) vector fields represent a dynamic system.
 
-\section{Proposed Solution}
-We define a criterion called "time coherence", mainly referring to how streamlines move on a frame-by-frame basis. 
-For a more detailed explanation of the approach, see the next section.
+Therefore, the focus of this thesis will be on three main topics:
+\begin{itemize}
+    \item How a lack of coherence of streamlines in different time steps of a continuous, unsteady field affects the visual quality of a field.
+    A criterion to measure time coherence will also be presented.
+    \item The implementation and underlying ideas of an image-based algorithm generating evenly-spaced long streamlines.
+    \item Adaptations of the algorithm, to allow a controlled bias between similarity to a previous time step, and optimality w.r.t. the current step.
+\end{itemize}
 
-Since this is mostly a problem of visual fidelity, we choose an image-based streamline generation algorithm,
-which we then extend to include the time coherence constraint. 
-By extending it in this way, animated streamline visualizations look much better and introduce a lot less artifacts.
+We have chosen an image-based approach (opposed to a feature-guided one, see Section 2 for a disambiguation) to our work,
+because the movement of lines in-between time frames is better suited for an appearance-focused algorithm.
+Another reason is that feature-guided algorithms usually act locally, whereas the movement of a line from one step to another
+is a global constraint.
 
-
-
-
+The succeeding sections are structured as follows:
+\begin{itemize}
+    \item Section 3 contains some fundamentals about vector fields and streamlines
+    \item Section 4 will be about the definition of the criterion of time coherence
+    \item The initial algorithm is examined in section 5
+    \item In Section 6, we introduce changes to the algorithm and examine their individual effects on different datasets
+    \item The implementation is more closely discussed in Section 7.
+\end{itemize}
+As a conclusion, we show some performance metrics, optimization issues, and some possibilities for further work.

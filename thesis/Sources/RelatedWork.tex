@@ -5,16 +5,16 @@
 
 Most of the works published in the field of streamline placement algorithms can be divided into two categories:
 \subsection{Image-Guided}
-The goal of this approach is to achieve a very uniform, almost "hand-drawn" appearance.
+The goal of this approach is to achieve a very uniform spacing of lines, giving an almost "hand-drawn" appearance.
 Generated images will usually have high visual quality, at the risk of potentially missing or misrepresenting important features.
 \\\\
-One of the first and most prominent examples in this category was written by Greg Turk and David Banks~\cite{TurkBanks}.
+One of the first and most prominent examples in this category was written by Greg Turk and David Banks~\cite{TurkBanks},
+which we have adopted as the base for our algorithm as well.
 In their research paper, a function (called the "Energy Function") is defined such that it maps an input image containing the potential streamlines to a scalar.
 The scalar represents the quality of the image, roughly defined as the uniformity of the gray scales it contains. 
-Adding/moving/removing/resizing streamlines is done randomly, at every step the energy function is used to determine whether the change gets accepted or discarded.
-The algorithm is finished when the energy function reaches a minimal threshold, or a maximum number of consecutive rejected steps is exceeded.
+Adding/moving/removing/resizing streamlines is done randomly, at every step the energy function is used to determine whether a change gets accepted or discarded.
+The algorithm is finished when the energy function reaches a lower energy bound, or a maximum number of consecutive rejected steps is exceeded.
 
-This algorithm will also serve as the basis for this thesis, with subsequent extensions for time coherence being added.
 
 \subsection{Feature-Guided}
 Feature-Guided algorithms examine the underlying field structure before placing seeds.

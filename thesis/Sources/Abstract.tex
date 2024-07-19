@@ -5,14 +5,10 @@
 \end{center}
 %
 \noindent
-Vector field visualizations are used in many fields like aerospace engineering, fluid dynamics, or physics.
-A common graphical representation of such fields are instantaneous integral lines, called streamlines.
-The placement of such streamlines for a continuous and steady vector field is subject of contemporary research,
-with a multitude of algorithms that can generate such streamline placements in an optimal way w.r.t different criteria.
-This thesis's focus will be on the time-coherent placement of streamlines, i.e. minimizing streamline movement during changes of the underlying continuous, but unsteady vector field.
-We present an iterative procedure that starts by seeding streamlines with a greedy algorithm for a single timestep.
-The seeds are then optimized to make them time coherent for as many lines a possible.
-The performance and complexity using different streamline seeding and modification strategies are examined and compared.
-Finally some limitiations, possible imporovements, and ideas for future work will be listed. 
+One of the most common elements used to represent vector fields are integral lines capable of showing flow dynamics, called streamlines.
+Finding optimal placements and lengths of such lines with respect to time is a key component when trying to animate unsteady vector fields.
+In this work, an algorithm capable of streamline placement with respect to time in an unsteady, continuous field will be presented.
+Initially, an image-guided approach based on the work by Turk and Banks is used, which generates good streamline placements for a single constant-time vector field.
+We then create a slightly different form of energy measure to dictate a previous time step's line placement, introducing a bias to the algorithm.
 \cleardoublepage
 

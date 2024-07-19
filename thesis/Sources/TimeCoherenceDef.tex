@@ -1,0 +1,13 @@
+\section{Time Coherence}
+Time Coherence refers to how a vector field behaves through different time steps.
+Intuitively, we consider areas within the field to be of high temporal coherence if the lines drawn on them are relatively stationary.
+Vice versa, we can say that an area of high fluctuation will be of low temporal coherence.
+A more formal definition employed in our algorithm is as follows:
+Given a field $F$ and a starting point $S_0$ (called the "seed"), we can integrate over the field.
+This yields a set of points $S^0$ which define a streamline containing every reached point, written as $S^0 = \int(S_0, F)$.
+We can therefore assign a streamline to every point in our field (and vice versa).
+Given $S_0$ and an unsteady field $F(t)$, compute for each time step $t_1...t_n$ the streamline $S^{0,t_i} = \int(S_0, F(t_i))$.
+In order to convert these sets of lines to a scalar, we use the Hausdorff Distance $dist(S^i,S^j)$,
+giving us the greatest minimal distance between any pair of two sets.
+We can therefore create a map $coh(S_i, F(t)): max(dist(\int(S_i, F(t_k)), \int(S_i, F(t_l))))$,
+sending each point in an unsteady vector field to a scalar, and thereby determining its temporal coherence.
