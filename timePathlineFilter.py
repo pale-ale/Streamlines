@@ -82,6 +82,7 @@ class TimePathlineFilter(VTKPythonAlgorithmBase):
     @smproperty.doublevector(name="Min Line Length", default_values=.3)
     def SetMinLineLength(self, length:float):
         self.minlinelength = length
+        self.Modified()
 
     @smproperty.xml("""
     <IntVectorProperty name="PadData"

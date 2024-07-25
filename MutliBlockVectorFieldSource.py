@@ -31,18 +31,24 @@ class VectorFieldSourceBase(VTKPythonAlgorithmBase):
         return 1
 
     def RequestData(self, request: vtk.vtkInformation, inInfo: vtk.vtkInformationVector, outInfo: vtk.vtkInformationVector):
+        ###### Setup the mesh properties like extents, bounds, and spacing
+        self.mesh: vtk.vtkImageData = vtk.vtkImageData.GetData(outInfo)
+        self.mesh.SetDimensions(self._get_dimensions_constrained())
+        with np.errstate(divide="ignore", invalid="ignore"):
+            spacing = self._get_bounds_constrained() / (self._get_dimensions_constrained() - (1,1,1))
+        self.mesh.SetSpacing(np.nan_to_num(spacing, nan=1.0))
+        self.mesh.Modified()
+        
+        ###### Add the timesteps we want to produce
         executive = self.GetExecutive()
         oo = outInfo.GetInformationObject(0)
         if oo.Has(executive.UPDATE_TIME_STEP()):
             time = oo.Get(executive.UPDATE_TIME_STEP())
         else:
             time = 0
-        mesh: vtk.vtkImageData = vtk.vtkImageData.GetData(outInfo)
-        mesh.SetDimensions(self._get_dimensions_constrained())
-        with np.errstate(divide="ignore", invalid="ignore"):
-            spacing = self._get_bounds_constrained() / (self._get_dimensions_constrained() - (1,1,1))
-        mesh.SetSpacing(np.nan_to_num(spacing))
-        pdata = mesh.GetPointData()
+
+        ###### Generate the Points and insert them
+        pdata = self.mesh.GetPointData()
         vectors = self._vectorFieldDef.get_vector(self.points, time)
         pdata.SetVectors(
             dsa.numpyTovtkDataArray(vectors, "velocity")
@@ -66,7 +72,7 @@ class VectorFieldSourceBase(VTKPythonAlgorithmBase):
         return dims
 
     def _get_bounds_constrained(self):
-        return self._bounds if not self.constrain_to_2d else np.array((*self._bounds[:2], 0), dtype=float)
+        return self._bounds if not self.constrain_to_2d else np.array((*self._bounds[:2], 0), dtype=np.float32)
 
     def timestep_generator(self):
         raise NotImplementedError()
@@ -79,6 +85,53 @@ class StraightVectorFieldSource(VectorFieldSourceBase):
         from vectorFieldDefs import StraightVectorField
         super().__init__(StraightVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
         self._vectorFieldDef: StraightVectorField
+    
+    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 0.0])
+    def SetBounds(self, x, y, z):
+        self._bounds = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Direction", default_values=[1.0, 0.0, 0.0])
+    def SetDirection(self, x, y, z):
+        self._vectorFieldDef.direction = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.intvector(Name="Dimensions", default_values=[21, 21, 1])
+    def SetDimensions(self, x, y, z):
+        self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.xml("""
+    <IntVectorProperty name="PadData"
+        label="Constrain to XY-Plane"
+        command="SetConstrainTo2D"
+        number_of_elements="1"
+        default_values="1">
+        <BooleanDomain name="bool" />
+    </IntVectorProperty>
+    """)
+    def SetConstrainTo2D(self, val):
+        '''Set attribute to signal whether data should be padded when RequestData is called
+        '''
+        self.constrain_to_2d = bool(val)
+        self.points = self._generate_points()
+        self.Modified()
+    
+    def timestep_generator(self):
+        yield [0]
+
+
+
+@smproxy.source(label="Rotating Vector Field Source")
+@smproperty.input(name="Input")
+class RotatingVectorFieldSource(VectorFieldSourceBase):
+    def __init__(self):
+        from vectorFieldDefs import RotatingVectorField
+        super().__init__(RotatingVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
+        self._vectorFieldDef: RotatingVectorField
     
     @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
     def SetBounds(self, x, y, z):
@@ -194,7 +247,7 @@ class DoubleOrbitVectorFieldSource(VectorFieldSourceBase):
         self.points = self._generate_points()
         self.Modified()
 
-    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 0.0])
+    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 1.0])
     def SetBounds(self, x, y, z):
         self._bounds = np.array([x,y,z])
         self.points = self._generate_points()
@@ -225,3 +278,78 @@ class DoubleOrbitVectorFieldSource(VectorFieldSourceBase):
     def timestep_generator(self):
         yield [0]
 
+
+@smproxy.source(label="Waves Vector Field Source")
+@smproperty.input(name="Input")
+class WavesVectorFieldSource(VectorFieldSourceBase):
+    def __init__(self):
+        from vectorFieldDefs import WavesVectorField
+        super().__init__(WavesVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
+        self._vectorFieldDef: WavesVectorField
+    
+    @smproperty.doublevector(Name="Offset", default_values=[0.0])
+    def SetOffset(self, offset:float):
+        self._vectorFieldDef._offset = offset
+        self.points = self._generate_points()
+        self.Modified()
+
+    @smproperty.doublevector(Name="Magnitude", default_values=[1.0])
+    def SetMagnitude(self, magnitude:float):
+        self._vectorFieldDef._magnitude = magnitude
+        self.points = self._generate_points()
+        self.Modified()
+   
+    @smproperty.doublevector(Name="Frequency", default_values=[1.0])
+    def SetFrequency(self, frequency:float):
+        self._vectorFieldDef._frequency = frequency
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="X-Speed", default_values=[1.0])
+    def SetXSpeed(self, xspeed:float):
+        self._vectorFieldDef._xspeed = xspeed
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Left Cutoff", default_values=[0.0])
+    def SetLeftCutoff(self, lcutoff:float):
+        self._vectorFieldDef._lcutoff = lcutoff
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Right Cutoff", default_values=[1.0])
+    def SetRightCutoff(self, rcutoff:float):
+        self._vectorFieldDef._rcutoff = rcutoff
+        self.points = self._generate_points()
+        self.Modified()
+
+    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 1.0])
+    def SetBounds(self, x, y, z):
+        self._bounds = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.intvector(Name="Dimensions", default_values=[21, 21, 1])
+    def SetDimensions(self, x, y, z):
+        self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.xml("""
+    <IntVectorProperty name="PadData"
+        label="Constrain to XY-Plane"
+        command="SetConstrainTo2D"
+        number_of_elements="1"
+        default_values="1">
+        <BooleanDomain name="bool" />
+    </IntVectorProperty>
+    """)
+    def SetConstrainTo2D(self, val):
+        '''Set attribute to signal whether data should be padded when RequestData is called
+        '''
+        self.constrain_to_2d = bool(val)
+        self.points = self._generate_points()
+        self.Modified()
+    
+    def timestep_generator(self):
+        yield [0]

@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+    \begin{axis}[ 
+        ticks=none,
+        axis lines = middle,
+        axis line style={->},
+        ymin=-.6, ymax=2.1,
+        xmin=-.6, xmax=2.1,
+        xlabel={$x$},
+        ylabel={$z$},
+        width=\pgfplotswidth,
+        height=\pgfplotswidth
+        ]
+        \draw[rotate around={45:(.5,1)}] (axis cs:.5,1) ellipse (.6 and 1) [radius=1, fill=white];
+        % Segment
+        \draw[rotate around={45:(.5,1)}, ->, dotted, thick, red] (.5, 1) -- (1.5, 1) node[right] {$s$};
+        % b0, b1
+        \draw[rotate around={45:(.5,1)}, ->, blue!50] (.5, 1) -- (-.05, .85) node[right] {$b_0$};
+        \draw[rotate around={45:(.5,1)}, ->, blue!50] (.5, 1) -- (.68, .09) node[right] {$b_1$};
+      
+        \draw[->] (0, 0) -- (-.5, -.5) node[right] {$y$};
+    \end{axis}
+\end{tikzpicture}

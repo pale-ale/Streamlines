@@ -4,5 +4,16 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"stplace.C": "cpp",
+			"repel.C": "cpp",
+			"visparams.C": "cpp",
+			"lowpass.C": "cpp",
+			"streamline.C": "cpp",
+			"vfield.C": "cpp",
+			"dissolve.C": "cpp",
+			"floatimage.C": "cpp"
+		}
+	}
 }

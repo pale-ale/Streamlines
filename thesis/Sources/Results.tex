@@ -3,6 +3,44 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Results}
 \label{chap:Results}
+In this chapter, we start by running the full algorithm on various datasets while
+discussing the different outcomes depending on the coherence strategy, kernels, and coherence weights.
+Then, we show some performance metrics and the hardware configuration.
+We finish this chapter with problems and limitations regarding the functionality
+and choice of parameters of our algorithm.
 
+\section{Visualizing different fields}
+The comparisons for the various fields are made between Turk and Banks' algorithm without coherence,
+a slightly modified approach simply reusing the line's seeds for successive frames, and our modified version
+using coaxing and shattering enabled.
+We start this section with three simple fields.
+\[(a): u(x,y) = (1,0) \hspace{7mm} (b): u(x,y,t)=(1,t) \hspace{7mm} (c): u(x,y,t)=(x-t, y-t)\]
+Next, we use the algebraically defined fields from previous parts of this thesis.\\
+
+\noindent Finally, a dataset of size 60 x 30 is used.
+
+\section{Performance}
+The algorithm was run on a system with the following relevant hardware.
+CPU: AMD Ryzen 5 5600X 3.70 GHz, RAM: 16 GB DDR4 ($\approx$ 400 MB used by ParaView).
+Most of the images with a black background color were generated in about 3-4 minutes each.
+Image ??? from the hot room dataset took ??? h m s.
+For comparison, the initial greedy algorithm took about 10 seconds.
+The size of the low pass image is of little no importance for speed, we tested filter radii between 2 and 32,
+both of which took about the same time to complete.
+\textit{Some better numbers/tables}
+
+\section{Issues and Limitations}
+Strong changes lead to drastic degradation of image quality when using high coherence weights.
+This can be counteracted by either interpolating the field movement, or reducing $\alpha$ to allow the lines to move more freely.
+Memory usage scales with the low pass size and line count, as every line saves its contributions to the energy as an array of the same size.
+When using large amounts of lines with a high low-pass resolution, memory usage can increase drastically.
+We found that the low-pass resolution has very little effect on the resulting line placement, we used the 120x120 resolution solely for a smoother appearance
+The coherence weight parameter is configurable prior to a run,
+but for different datasets (more specifically: different time strides) it is often useful to vary this parameter.
+This could perhaps be added via an adaptive method,
+generating different images from one previous image using different weights,
+and selecting the one with the least total energy.
+Of course, this would increase the computational cost drastically,
+and we have therefore decided not to add this feature for now.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

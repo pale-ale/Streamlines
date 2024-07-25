@@ -1,44 +1,107 @@
 \chapter{Method}
+In this chapter, we describe the motivation of and concepts used for developing an algorithm supporting time coherence.
+We start with an implementation that was ultimately deemed infeasible in \Cref{sec:failedalg},
+including some mathematical concepts and the reasoning behind foregoing it in favor of a more global approach.
+\Cref{sec:basealg} is about the algorithm we decided on using, with motivation, a concept,
+and finally some implementation ideas for time coherence in \Cref{sec:tcmot}, 
+\Cref{sec:tcdef}, and \Cref{sec:tcalg} respectively.
+
 \input{Sources/FailedAlgorithm.tex}
 \input{Sources/BaseAlgorithm}
 
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[scale=.07]{figures/Necessary/TBWavesShort1.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[scale=.07]{figures/Necessary/TBWavesShort2.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \caption{
+        (a), (b): A vector field undergoing a change over time, increasing the amplitude at its center.
+        It is described by $u(x,y,t) = (1, \sin(5t\pi x) \text{ if } 0.4 \leq x \leq 0.6 \text{ else } 0)^T$ for $t=1$ and $t=3$ in (a) and (b) respectively.
+    }
+    \label[figure]{fig:necessary1}
+\end{figure}
 
 \section{Why Time Coherence is Necessary}
+\label[section]{sec:tcmot}
+When visualizing a vector field using streamlines, it is desirable to capture the features of the field as accurately as possible.
+For image-based solutions, this means that we are interested in a line placement that poses little to no visual distractions from the general field flow.
+Common distractions include artifacts like shapes arising from the position of lines, but not being created by the actual field.
+Other forms of visual clutter include strong variations in density, or empty spaces, which make it very hard to judge a field's behavior in these regions.
+Usually, there is a trade-off between the accuracy of capturing a field and visual clarity,
+with image-guided approaches favoring the latter.
 
+A new type of visual artifact is introduced when we add a time axis to our data.
+Where before, this approach could solely focus on optimizing a single image w.r.t. visual criteria, we now have to take into account the movement
+of lines from one time step to another.
+What we are looking for is a line placement that allows large portions of the image to stay the same between two time steps, i.e. the largest possible "overlap" between the two images.
+This new criterion may also counteract the spacial distribution of lines,
+since creating or removing lines will severely impact how the image looks from one time step to the next.\\
+\noindent We can illustrate this behavior using a field like the one defined by \Cref{fig:necessary1}.
+We take a closer look at $u(x,y,t)$ at two time steps, namely $t=1$ and $t=3$.
+The notable change of the field's trajectory from one time step to the next is a strong ridge forming in the center column.
+
+\newpage
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[scale=.07]{figures/Necessary/TBWavesLong1.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.49\textwidth}
+        \centering
+        \includegraphics[scale=.07]{figures/Necessary/TBWavesLong2.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \caption{
+        (a): A single streamline seeded exactly at the center of the image at time $t=1$ (black) and $t=3$ (red).
+        (b): The same initial streamline at $t=1$, however the streamline kept the same height in areas of little movement on the left and right at time $t=3$ (green) because the algorithm shifted the seed.
+    }
+    \label[figure]{fig:necessary2}
+\end{figure}
+We now look at an intuitive display of a temporal artifact.
+In \Cref{fig:necessary2} (a), we see how the increase in ridge height leads to movement of the whole line,
+which is visually irritating as it distracts from the actual feature undergoing the change.
+In fact, it suggests that instead of the center moving upward, the outer regions move downward,
+giving room for misconception of the field's behavior.
+What we want instead, is as little movement as possible, 
+as can be seen in the transition shown in \Cref{fig:necessary2} (b).
+Here, large portions remain stationary, with only segments close to the center rising upwards.
+An important factor for the generation of such images is the seed choice.
+We have chosen the same seed in both cases in order to compare the
+placement with and without our algorithm optimizing the seed position to respect
+what we define in the next chapter as \textit{time coherence}.
+
+\newpage
 
 \input{Sources/TimeCoherenceDef.tex}
 \input{Sources/TimeCoherentAlgorithm.tex}
 
 
+% We have chosen to keep most of these actions as-is, the only difference introduced is
+% a change to how the lengthening and shortening is done. 
+% Instead of the two binary choices of lengthen/shorten and front/back, which only add/subtract a tiny bit at a time,
+% we decided to choose a segment count at random between -5 and 5 for each end.
+% This allows faster growth/shrinking (and hence faster convergence) while still preventing overlaps.
 
-At first, a heuristic criterion for temporal coherence between stream lines is defined.
-Then ...
+% \subsection{Initial Seeding}
+% We prepare the image for the optimization routine by adding many streamlets with seeds on a regular grid to the image.
+% This can also be done randomly yielding similar image quality,
+% however strided access is more efficient with little to no benefit for the latter.
 
+% \subsection{Oracle}
+% The oracle from Turk and Bank's algorithm is used to suggest shorten/lengthen and move operations.
+% Our oracle focuses on shorten/lengthen suggestions only.
 
-\begin{itemize}
-    \item old implementation
-    \item issues, why sth else was used
-    \item turk and banks
-    \item why turk and banks? (spacial coherence?)
-    \item time coherence definition
-\end{itemize}
-
-We have chosen to keep most of these actions as-is, the only difference introduced is
-a change to how the lengthening and shortening is done. 
-Instead of the two binary choices of lengthen/shorten and front/back, which only add/subtract a tiny bit at a time,
-we decided to choose a segment count at random between -5 and 5 for each end.
-This allows faster growth/shrinking (and hence faster convergence) while still preventing overlaps.
-
-\subsection{Initial Seeding}
-We prepare the image for the optimization routine by adding many streamlets with seeds on a regular grid to the image.
-This can also be done randomly yielding similar image quality,
-however strided access is more efficient with little to no benefit for the latter.
-
-\subsection{Oracle}
-The oracle from Turk and Bank's algorithm is used to suggest shorten/lengthen and move operations.
-Our oracle focuses on shorten/lengthen suggestions only.
-
-\subsection{Adding time coherence}
-We added two important modifications to the aforementioned algorithm to make it partially time-coherent.
-The first modification affects how seeds are chosen in the beginning of an optimization pass; the second affects
-how the energy measure is computed and lines are guided toward their final positions.
+% \subsection{Adding time coherence}
+% We added two important modifications to the aforementioned algorithm to make it partially time-coherent.
+% The first modification affects how seeds are chosen in the beginning of an optimization pass; the second affects
+% how the energy measure is computed and lines are guided toward their final positions.

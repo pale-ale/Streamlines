@@ -1,0 +1,30 @@
+\begin{tikzpicture}
+    \tikzset{
+        pics/carc/.style args={#1:#2:#3}{
+            code={
+               \draw[pic actions] (#1:#3) arc(#1:#2:#3);
+            }
+        }
+    }
+    \begin{axis}[ 
+        ticks=none,
+        axis lines = middle,
+        axis line style={->},
+        ymin=-1.3, ymax=1.3,
+        xmin=-1.3, xmax=1.3,
+        xlabel={$1$},
+        ylabel={$i$},
+        width=\pgfplotswidth,
+        height=\pgfplotswidth
+        ]
+        \draw (0,0) circle [radius=1, fill=white];
+        \draw[very thick] (0,0) pic[red]{carc=0:72:2cm};
+        \node[red] at (1,1) {$\frac{2\pi}{5}$};
+
+        \draw[very thick, ->] (0,0) -- (1,0) node[midway, above right] {$n_0$};
+        \draw[very thick, ->] (0,0) -- ( .309, .951) node[midway, right] {$n_1$};
+        \draw[very thick, ->] (0,0) -- (-.809, .588) node[midway, above] {$n_2$};
+        \draw[very thick, ->] (0,0) -- (-.809,-.588) node[midway, below] {$n_3$};
+        \draw[very thick, ->] (0,0) -- ( .309,-.951) node[midway, right] {$n_4$};
+    \end{axis}
+\end{tikzpicture}

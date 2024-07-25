@@ -44,8 +44,8 @@
   linkcolor  = BrickRed,
   urlcolor   = BrickRed,
   % pdftex,
-  pdfauthor={Guybrush Threepwood},
-  pdftitle={Reflections on the correlation between the tendency to procrastinate and the likelihood to be awarded a doctoral degree},
+  pdfauthor={Alexander Baucke},
+  pdftitle={Time-Coherent Streamline Placment},
   % pdfsubject={The Subject},
   % pdfkeywords={Some Keywords},
   % pdfproducer={Latex with hyperref, or other system},
@@ -100,10 +100,19 @@
 \usepackage{amsmath}
 \usepackage{mathpazo}
 \usepackage{lettrine}
+
+
 \usepackage{tikz}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows.meta}
+
 \usepackage{wrapfig}
+\usepackage{subcaption}
+% \usepackage{caption}
+% \captionsetup{font={footnotesize, sf}, labelfont=bf}
+
 \usepackage{pgfplots}
-\usepackage[justification=centering]{caption}
+\usepackage[skip=3pt]{caption}
 \usepackage{framed}
 \pgfplotsset{compat=newest}
 
@@ -128,8 +137,12 @@
 \usepackage{mathtools}
 \usepackage{amssymb}
 \usepackage{siunitx}
-
+\usepackage{changepage}
 \usepackage{blindtext}
+\usepackage{cleveref}
+
+\newlength\pgfplotswidth
+
 
 % Corrects \autoref{}: chapter -> Chapter, section -> Section, subsection -> Section
 \addto\extrasenglish{%

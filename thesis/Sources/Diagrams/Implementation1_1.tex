@@ -1,0 +1,11 @@
+\begin{tikzpicture}[domain=0:4, scale=.8]
+    \draw[very thin,color=gray] (-0.1,-0.1) grid (3.9,3.9);
+
+    \draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
+    \draw[->] (0,-0.2) -- (0,4.2) node[above] {$y$};
+
+    \draw[dotted, thick]                       (1.5,0) -- (1.5,1) -- (1.73,1.87) -- (2.3,2.78) -- (3,3.4) -- (4,4);
+    \draw plot[only marks, mark=x] coordinates{(1.5,0)               (1.73,1.87)    (2.3,2.78)    (3,3.4)};
+    
+    \draw[red] plot[only marks, mark=*] coordinates{      (1.5,1)};
+\end{tikzpicture}

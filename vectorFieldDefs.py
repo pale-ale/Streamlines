@@ -29,6 +29,14 @@ class StraightVectorField(VectorFieldBase):
         return np.tile(self._direction, (ps.shape[0], 1))
 
 
+class RotatingVectorField(VectorFieldBase):
+    def get_vector(self, ps:ndarray, t:float):
+        xs = -ps[:, 1]
+        ys = ps[:, 0]
+        zs = np.zeros_like(xs)
+        return np.vstack((xs, ys, zs))
+
+
 class SourceVectorField(VectorFieldBase):
     _source_position = np.zeros(3, dtype=float)
 
@@ -120,3 +128,21 @@ class DoubleOrbitVectorField(VectorFieldBase):
     @dist.setter
     def dist(self, new_dist:float):
         self._dist = new_dist
+
+
+class WavesVectorField(VectorFieldBase):
+    _offset = 0.0
+    _magnitude = 1.0
+    _frequency = 1
+    _xspeed = 1
+    _lcutoff = 0
+    _rcutoff = 1
+
+    def get_vector(self, ps: ndarray, t:float) -> ndarray:
+        vecs = np.zeros_like(ps)
+        period_len = self._frequency * 2 * np.pi
+        xvals = self._xspeed
+        yvals = np.sin((ps[:,0] + self._offset + t) * period_len) * self._magnitude
+        vecs[:,0] = xvals
+        vecs[:,1] = np.where( (self._lcutoff < ps[:,0]) & (ps[:,0] < self._rcutoff), yvals, 0)
+        return vecs

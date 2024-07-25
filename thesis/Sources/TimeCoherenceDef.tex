@@ -1,13 +1,58 @@
-\section{Time Coherence}
-Time Coherence refers to how a vector field behaves through different time steps.
-Intuitively, we consider areas within the field to be of high temporal coherence if the lines drawn on them are relatively stationary.
-Vice versa, we can say that an area of high fluctuation will be of low temporal coherence.
-A more formal definition employed in our algorithm is as follows:
-Given a field $F$ and a starting point $S_0$ (called the "seed"), we can integrate over the field.
-This yields a set of points $S^0$ which define a streamline containing every reached point, written as $S^0 = \int(S_0, F)$.
-We can therefore assign a streamline to every point in our field (and vice versa).
-Given $S_0$ and an unsteady field $F(t)$, compute for each time step $t_1...t_n$ the streamline $S^{0,t_i} = \int(S_0, F(t_i))$.
-In order to convert these sets of lines to a scalar, we use the Hausdorff Distance $dist(S^i,S^j)$,
-giving us the greatest minimal distance between any pair of two sets.
-We can therefore create a map $coh(S_i, F(t)): max(dist(\int(S_i, F(t_k)), \int(S_i, F(t_l))))$,
-sending each point in an unsteady vector field to a scalar, and thereby determining its temporal coherence.
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[scale=.075]{figures/FilterRadius/Distant.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[scale=.075]{figures/FilterRadius/Close.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}{.375\textwidth}
+        \centering
+        \resizebox{\textwidth}{!}{
+            \input{Sources/Diagrams/BrightnessDiag1.tex}
+        }
+        \caption*{(c)}
+    \end{subfigure}
+    \caption{
+        How the proximity of lines changes the brightness of their respective footprints in a 120x120px image.
+        (a): Two lines approx. three times the blur radius apart.
+        (b): Two lines only 3/4 the blur radius apart.
+        (c): The brightness of the more distant lines (fig. a, blue) and the closer ones (fig. b, red).
+        On the x-axis we see the height of the pixels taken along the red and blue strips in (a) and (b) respectively, counted from the top.
+    }
+    \label[figure]{fig:closeenergy}
+\end{figure}
+\section{Time Coherence - Definition}
+\label[section]{sec:tcdef}
+Based on the desired image overlap and concepts from computing the energy measure, we can infer a measure for time coherence.
+In fact, we can use a definition analogous to $E$ already defined by Turk and Banks.
+To avoid confusion, we will from now on write the spacial components (former $E$ and $L$) as $E_s, L_s$ to better separate them from their temporal counterparts $E_t$ and $L_t$.
+Instead of the comparison between a low-pass image of lines and a constant target brightness, the temporal energy $E_t$ now depends on two sets of lines ($I_0, I_1$) and uses a different low-pass filter ($L_t$):
+\[E_t(I, I') = \int_x\int_y\left[(L_t\ast I_0)(x,y)-(L_t\ast I_1)(x,y)\right]^2\,dx\,dy\]
+This measure would give us the squared difference between the brightnesses of two different sets of lines.
+Allowing for a new kernel gives us more freedom to change \textit{how} we measure the temporal energy, as we do not want it to behave the same way as the spatial energy does.
+For example, the measure $E_s$ of two neighboring streamlines is the strongest in the center of them, not at the actual line positions, which can be seen in \cref{fig:closeenergy}.
+This means that by using $E_s$ instead of $E_t$, we would change the number or position of lines by drawing them into the center of two former lines,
+thereby intently worsening time coherence.
+Conversely, this would also prohibit streamline creation at darker spots, giving rise to holes in our line image.\\
+
+The optimum for time coherence would of course be two identical sets of streamlines, which effectively minimize $E_t$ to zero.
+
+% Combining it with the spacial measure $E$ via linear interpolation gives us a good amount of control how strong we want the coherence to be.
+
+% Time Coherence refers to how a vector field behaves through different time steps.
+% Intuitively, we consider areas within the field to be of high temporal coherence if the lines drawn on them are relatively stationary.
+% Vice versa, we can say that an area of high fluctuation will be of low temporal coherence.
+% A more formal definition employed in our algorithm is as follows:
+% Given a field $F$ and a starting point $S_0$ (called the "seed"), we can integrate over the field.
+% This yields a set of points $S^0$ which define a streamline containing every reached point, written as $S^0 = \int(S_0, F)$.
+% We can therefore assign a streamline to every point in our field (and vice versa).
+% Given $S_0$ and an unsteady field $F(t)$, compute for each time step $t_1...t_n$ the streamline $S^{0,t_i} = \int(S_0, F(t_i))$.
+% In order to convert these sets of lines to a scalar, we use the Hausdorff Distance $dist(S^i,S^j)$,
+% giving us the greatest minimal distance between any pair of two sets.
+% We can therefore create a map $coh(S_i, F(t)): max(dist(\int(S_i, F(t_k)), \int(S_i, F(t_l))))$,
+% sending each point in an unsteady vector field to a scalar, and thereby determining its temporal coherence.

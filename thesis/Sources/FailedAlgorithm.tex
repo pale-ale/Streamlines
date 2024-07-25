@@ -1,39 +1,228 @@
-\section{Failed Attempt}
+\section{Initial Greedy Algorithm}
+\label[section]{sec:failedalg}
 \begin{leftbar}
     \noindent
-    At first, it was attempted to create a custom algorithm capable of streamline placement in 3D.
-    We then wanted to introduce changes that allowed the lines to be placed adhering to spatial coherence.
-    Unfortunately, this was met with failure relatively quickly.
-    The algorithm proposed was simply too greedy, and did not yield good initial results.
-    Adding time coherence in this case would be of very little benefit here, since the initial image quality and performance degraded way too quickly for it to be actually useful.
-    We still outline some of it in this chapter, in case it is of interest or as an example.
+    \textbf{Motivation:} 
+    Since time coherence only exists as a connection from one set of streamlines to another, we started by creating an algorithm capable of generating such streamlines.
+    We could then use this algorithm to generate sets of streamlines for time frames without time coherence as a negative example and to illustrate the effects of its absence.
+    Initially, the algorithm was developed for the 2D case, the extension to 3D is shown in subsection 4.1.2.
 \end{leftbar}
 \noindent
-We start with a simple algorithm to generate streamlines in a 2D slice of a vector field.
-The local z-component of the Cartesian grid is simply set to zero for the relevant sections of the algorithm.
-The algorithm uses two operations: Streamline Traversal and Seed Filtering, which are executed round-robin.
-\subsection{Streamline Traversal}
-The Streamline Traversal process works as follows:
-\begin{itemize}
-    \begin{minipage}{.6\textwidth}
-    \item \textbf{Step 1:}
-    Choose a seed point from a list of candidates (initially an arbitrary point from the dataset) and remove it from the list.
-    Then integrate forward and backward to obtain the other points on the streamline, until
-    a number of steps is reached, we cross the bounding box, or we get too close to another streamline.
-    \item \textbf{Step 2:}
-    Compute the normals, add and subtract them to the succeeding point. The first point (according to step count in backward iteration) will not have a preceding normal, and is not used in this step. These points are new seed candidates for further streamline placement.
-    \end{minipage}
-    \begin{minipage}{.3\textwidth}
-    \input{Sources/Diagrams/Implementation1}
-    \end{minipage}
-\end{itemize}
-\subsection{Seed Filtering}
-Since after the 1st iteration, roughly half of the points added by step 2 will be very close to the preceding iteration's points, we store the parent's points and remove any new points from the current step if they are too close to the parent's points.
-Furthermore, a grid is used to track the global state of the field w.r.t to lines existing in individual segments.
-This is used to determine whether a line is getting too close to another or if it has room to expand. Streamlines are removed if their length is shorter than 10 iteration steps.
-\section{Steady Field Streamline Placement in 3D}
-Instead of the trivial normal(s), we now use a normal plane around the streamline trajectory, created via numpy's QR-decomposition. The algorithm returns orthonormalized vectors, the first column vector's direction being equal to the first provided input vector.
-We can therefore feed it the streamline trajectory and two basis vectors, and receive 2 orthonormal basis vectors $b_0, b_1$.\\
-With $i$ being the complex number, we obtain $k$ roots of unity via \[n_j = e^{ji2\pi/k}, j = 0, 1, ..., k-1\]
-We then transform them into our 3D frame of reference using \[v_i = re(n_i)*b_0 + im(n_i)*b_1 \] This gives us $k$ uniformly placed  vectors in the normal plane around the current streamline segment. The rest of the algorithm stays largely the same, the grid is simply extended into the 3rd dimension.
+The algorithm uses two operations, streamline traversal and seed filtering,
+which are executed round-robin until there is no more room for new streamlines.
+The result of the algorithm is a space-filling set of streamlines with even spacing in 3D fields.\\
+We use 2 essential parameters to control how the images are generated.
+The first one, $d_s$, is the neighbor search distance. 
+It controls the distance from the current streamline where new streamlines start at,
+allowing us to fill the whole space.
+In order to add longer liens while guaranteeing even spacing,
+we introduce a second parameter $d_c$, which is the neighbor cutoff distance.
+As soon as a streamline comes within this distance to another streamline, it is terminated.\\
+The typical range for $d_c$ is $0.5\,d_s \leq d_c \leq 0.75\,d_s$.
+Making $d_c$ smaller than $0.5\,d_s$ allows streamlines to get very close,
+introducing visual clutter and a crowded appearance.
+At values $\geq0.75\,d_s$, a lot of streamlines are very short in forward or backward time due to the proximity of $d_s$ and $d_c$,
+causing most of them to be removed immediately.
+
+\newpage
+\subsection{Two-Dimensional Implementation}
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \input{Sources/Diagrams/Implementation1_1}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \input{Sources/Diagrams/Implementation1_2}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[scale=.1]{figures/OldAlgRotate.png}
+        \caption*{(c)}
+    \end{subfigure}
+    \caption{
+        (a): Forward and backward streamline integration through the field starting at the seed (red).
+        The chosen sample points are drawn as a cross, and include the seed.
+        (b): Equidistant seed candidates (green) obtained from the normals at the sample points are chosen for the next iteration.
+        (c): Lines with equal distance generated by our algorithm in a field defined by $u(x,y)=(y, -x)$.}
+    \label[figure]{fig:failedbasics}
+\end{figure}
+\vspace{-1cm}
+\subsubsection{Streamline Traversal}
+First, we choose a seed point from a list of candidates (initially an arbitrary point from the dataset) and remove it from the list.
+Then we integrate forward and backward (\cref{fig:failedbasics} (a)) to obtain the other points on the streamline,
+until a number of steps is reached, we cross the bounding box, or we get too close to another streamline.
+If the total length of the streamline is too small, we remove it.\\
+To obtain the seed candidates, we compute the normals of the field at these points, and add points a distance $d_s$ away from them to the list (\cref{fig:failedbasics} (b)).
+\subsubsection{Seed Filtering}
+The number of neighbor seed candidates is roughly 2$n$, where $n$ is the number of samples of the streamline we are integrating.
+To quickly remove seeds that cannot produce a good streamline, we use two filtering conditions.
+The first condition arises from the fact that roughly half the seeds generated by a streamline $L_1$ during the traversal process will lie close to - if not exactly on - the preceding streamline, $L_0$.
+This happens because the seeds are placed a distance $d_s$ away, 
+while the streamlines are mostly that same distance apart themselves.
+The second condition is the distance to other seeds,
+as starting a streamline from a seed that is too close to another will immediately end it.
+Therefore, we filter two sets of seeds: The ones generated during the traversal process and those present in the entire field.
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[scale=.1]{figures/OldAlgOrbit.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[scale=.3]{figures/OldAlgOrbitDistsZoom.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \caption{
+        (a): The streamlines created in a double gyro dataset.
+        (b): Top center view of (a). New streamlines created from the center streamline (red) are cut off due to reaching $d_c$ (magenta). New streamlines are only drawn at distance grater than $d_c$, producing the gap between the upper and lower three streamlines (black).
+        The lower streamlines continue at a distance of $d_S$ (green).
+    }
+\end{figure}
+\subsubsection{Line Cutoff and Optimization}
+In order to quickly filter the $2n$-pairs for points on the parent streamline, we store the parent's points and remove any of the $2n$ seeds from the current step if they are too close.
+When removing other seeds we come across, we employ a grid with a spacing of $d_c$ and use a dictionary to obtain lists of points inside the grid cell.
+If we add a point during integration, we simply look up the coordinate and its 8 neighboring cells as a key to points in the area.
+If a seed closer than $d_c$ is found in those cells, it is subsequently removed.
+This allows for an easy way to end the integration when getting too close to another streamline as well:
+We need only keep track of whether we came close to another streamline's points during integration
+(provided the integration step size is less than $d_c$, which is usually the case).
+
+\newpage
+\subsection{Steady Field Streamline Placement in 3D}
+\label[section]{sec:3D}
+% The most important part to generate streamlines in 3D is obtaining the seed locations.
+% In three dimensions, a vector has infinitely many normals, which all lie on a plane it is a normal of.
+% Therefore, we define a number of points to evenly distribute around the streamline.
+% The process of obtaining these points is as follows.
+% \rule[2mm]{\textwidth}{0.4pt}
+% \begin{minipage}{.6\textwidth}
+%     Instead of the two trivial normals in 2D, we now construct a normal plane around the streamline trajectory at the streamline's points.
+%     For this, we find two vectors which are linearly independent of each other and the trajectory, and then use NumPy's QR-decomposition to orthonormalize them.
+%     The algorithm returns three orthonormalized column vectors, the first of which has a direction equal to the first provided input vector.
+%     We can therefore feed it the streamline segment's direction and two basis vectors, and receive two orthonormal basis vectors $b_0, b_1$.
+% \end{minipage}
+% \begin{minipage}{.39\textwidth}
+%     \centering
+%     \setlength\pgfplotswidth{1.2\textwidth}
+%     \input{Sources/Diagrams/Implementation2}
+% \end{minipage}
+% \rule{\textwidth}{0pt}
+% \rule[3mm]{\textwidth}{0.4pt}
+% \begin{minipage}{.6\textwidth}
+%     Having found $b_0$ and $b_1$, we can use the roots of unity to find evenly spaced points on the unit circle.
+%     With $i$ being the complex number, we obtain $k$ roots of unity via 
+%     \vspace{-2mm}
+%     \[n_j = e^{ji2\pi/k}, j = 0, 1, ..., k-1\]
+%     \vspace{-2mm}
+%     Since the magnitude of $n_j$ is always one, we do a simple basis transformation into the 3D frame of reference.
+%     We obtain the $j$-th 3D-vector $v_j$ from the $j$-th root using our basis vectors $b_0$ and $b_1$:
+%     \vspace{-2mm}
+%     \[v_j = re(n_j)*b_0 + im(n_j)*b_1 \]
+% \end{minipage}
+% \begin{minipage}{.39\textwidth}
+%     \centering
+%     \setlength\pgfplotswidth{1.2\textwidth}
+%     \input{Sources/Diagrams/Implementation3.tex}
+% \end{minipage}
+% \rule[-1mm]{\textwidth}{0.4pt}
+% This gives us $k$ uniformly placed vectors in the normal plane around the current streamline segment.
+% The rest of the algorithm stays largely the same as in 2D, the grid used for seed filtering is extended into the 3rd dimension accordingly.
+% See figure 4.5 on the next page for an example using a 3D vector field.
+% \newpage
+% \begin{figure}[ht]
+%     \centering
+%     \begin{subfigure}[b]{0.5\textwidth}
+%         \centering
+%         \includegraphics[scale=.1]{figures/OldAlg3D5.png}
+%         \caption*{(a)}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.4\textwidth}
+%         \centering
+%         \includegraphics[scale=.09]{figures/OldAlg3D400.png}
+%         \caption*{(b)}
+%     \end{subfigure}
+%     \caption{
+%         (a): A clear view of the center streamline with five neighbor streamlines evenly distributed at distance $d_S$.
+%         (b): A filled cube containing 254 streamlines. Notice the resemblance to Figure 4.1 (c).
+%     }
+% \end{figure}
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{.33\textwidth}
+        \centering
+        \setlength\pgfplotswidth{\textwidth}
+        \input{Sources/Diagrams/Implementation2.tex}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}{.33\textwidth}
+        \centering
+        \includegraphics[scale=.05]{figures/OldAlg3D5.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}{.3\textwidth}
+        \centering
+        \includegraphics[scale=.05]{figures/OldAlg3D400.png}
+        \caption*{(c)}
+    \end{subfigure}
+    \caption{
+        (a): The normal plane of a streamline segment $s$ with two orthonormal basis vectors $b_0, b_1$.
+        (b): A clear view of the center streamline with five neighbor streamlines evenly distributed at distance $d_S$.
+        (c): A filled cube containing 254 streamlines. Notice the resemblance to \cref{fig:failedbasics} (c).
+    }
+    \label[figure]{fig:failed3d}
+\end{figure}
+The most important part to generate streamlines in 3D is obtaining the seed locations.
+In three dimensions, a vector has infinitely many normals, which all lie on a plane it is a normal of.
+Therefore, we define a number of points to evenly distribute around the streamline.
+The process of obtaining these points is as follows.
+Instead of the two trivial normals in 2D, we now construct a normal plane around the streamline trajectory at the streamline's points.
+For this, we find two vectors which are linearly independent of each other and the trajectory,
+and then orthonormalize them to receive two orthonormal basis vectors $b_0, b_1$ (see \cref{fig:failed3d} (a)).
+Having found $b_0$ and $b_1$, we can use the roots of unity (fundamentals, \cref{rootsofunity}) to find evenly spaced points on the unit circle.
+With $i$ being the complex number, we obtain $k$ roots of unity via 
+\[n_j = e^{ji2\pi/k}, j = 0, 1, ..., k-1\]
+Since the magnitude of $n_j$ is always one, we do a simple basis transformation into the 3D frame of reference.
+We obtain the $j$-th 3D-vector $v_j$ from the $j$-th root using our basis vectors $b_0$ and $b_1$:
+\[v_j = re(n_j)*b_0 + im(n_j)*b_1 \]
+This gives us $k$ uniformly placed vectors in the normal plane around the current streamline segment.
+The rest of the algorithm stays largely the same as in 2D, the grid used for seed filtering is extended into the 3rd dimension accordingly.
+See \cref{fig:failed3d} (b, c) for an example using a 3D vector field.
+\newpage
+\begin{figure}[ht]
+    \centering
+    
+\end{figure}
+\subsubsection{Shortcomings}
+\begin{figure}[ht]
+    \begin{adjustwidth}{-2cm}{-2cm}
+        \centering
+        \begin{subfigure}[b]{.5\textwidth}
+            \includegraphics[scale=.075]{figures/OAH2D1.png}
+            \caption*{(a)}
+        \end{subfigure}
+        \begin{subfigure}[b]{.5\textwidth}
+            \includegraphics[scale=.075]{figures/OAH2D2.png}
+            \caption*{(b)}
+        \end{subfigure}
+    \end{adjustwidth}
+    \caption{
+        Two different line placements due to a seed choice difference of only $1e-4\%$ of image width.
+    }
+    \label[figure]{fig:failedshift}
+\end{figure}
+While this algorithm can quickly fill a space with decent streamlines,
+the main problem is the inability to cope with small changes to streamlines.
+This is mainly a result of the strong hierarchical nature:
+Since every streamline after the first comes from its predecessor,
+a change at the "root" can have drastic consequences for the succeeding streamlines (see \cref{fig:failedshift}).
+In the context of time coherence, this makes the algorithm unsustainable, as an unsteady field is practically guaranteed to change at least slightly in the whole domain.
+To make the streamlines time coherent, we need to be able to move streamlines around without affecting the global scope too much.
+With this approach, changing the position of a streamline after the generation of its neighbors causes a re-evaluation of every streamline it is a predecessor of.
+Due to this problem, we do not see an effective way to implement time coherence, and supersede this algorithm in favor of an image-guided one.
 \newpage

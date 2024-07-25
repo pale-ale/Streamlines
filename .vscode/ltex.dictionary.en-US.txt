@@ -1,3 +1,7 @@
 streamlets
 normals
 rasterization
+Bresenham
+optimality
+convolving
+ParaView

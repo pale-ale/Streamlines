@@ -1,63 +1,374 @@
-\section*{Adding Time Coherence}
-\subsubsection*{Shattering}
-At the end of a time step's optimization phase, we break every streamline apart into smaller streamlets.
-This leaves each line with the appearance of simply being a dashed line, with each fragment having its own seed.
-The seeds obtained this way are then used as the initial seeding strategy for the subsequent frame; the regular grid is only used for the first frame.
-This way, we obtain many seeds that, if the field does not change too much, will quickly merge back into the line they came from.
-If the field \textit{does} change, some segments will still reconnect and therefore keep their temporal coherence,
-whereas areas of strong fluctuation will connect to different seeds.
-This results in changes being limited to parts where change is necessary, and not affecting streamline trajectory too much on a global level.
+\section{Adding Time Coherence}
+\label[section]{sec:tcalg}
+This section will be about how we translated the definition from section 4.4 into a functional component for our algorithm.
+We use the aforementioned energy measure to induce a process we refer to as \textit{coaxing}, as we are applying continued pressure to lines to move them in the direction of their former footprints.
 
-\subsubsection*{Coaxing}
-Since the energy function is used to move the image toward a constant desired target brightness, we achieve a uniform spacing of lines.
-Unfortunately, this does not guarantee the lines be placed at similar positions as they were in the previous frame.
-In order to coax the algorithm into favoring previous line positions, we rewrite the energy function as the linear
-interpolation between two components. Given the previous frame's low-pass image $(L\ast I)$ (written $(L\ast I')$) we use: %replace $t$ with $T\in\mathbb{R}^{x\times y}$ defined as 
+\noindent A second addition called \textit{shattering} will be introduced as well,
+where lines are split into smaller segments (\textit{fragments}) to be used as the starting layout in the next timestep.
+This can increase coherence as well by seeding lines at the same place, and works especially well in combination with coaxing.
+
+% After introducing a new kernel $L_t$ with roughly half the radius of $L_s$, spots of elevated brightness are now very uncommon.
+% They do not affect the line placement in a way noticeable to the naked eye anymore.
+% Another benefit is that lines further away than that radius will not be influenced, so that the backfilling of an empty spot is mostly of local consequence.
+
+% After an image has reached its final state, we shatter it, breaking every streamline into a number of smaller streamlines, called \textit{shards}.
+% Every line is divided equally into shards of roughly the start length of our lines.
+% The shards are then used as our initial seeding pattern instead of the regular grid for the next frame.
+% This means that when shattering is enabled, we only generate the initial seeds for the first frame, every subsequent frame gets its initial seeds via the shatter process of the previous one.
+
+\subsection{Coaxing}
+Since most of the algorithm's optimization is centered around the comparison with an energy level before and after an action was taken,
+modifying the energy function provides a lot of leverage regarding how lines are placed. 
+In order to make the algorithm favor previous line positions, we therefore rewrite the energy function as the linear
+interpolation between $E_s$ and $E_t$. This gives us good control over how much time coherence we apply, as choosing too much will cause a degradation in image quality.
+Given the previous frame's low-pass image with the time kernel $(L_t\ast I_0)$ we use:
 \begin{equation*}
     \begin{split}
-        E(I, I')   &= \alpha E_0(I)+(1-\alpha)E_1(I, I')\\
-        E_0(I)     &= \int_x\int_y\left[(L\ast I)(x,y)-t\right]^2\,dx\,dy\\
-        E_1(I, I') &= \int_x\int_y\left[(L\ast I)(x,y)-(L\ast I')(x,y)\right]^2\,dx\,dy
-        % T_{x,y} = t + \left(L'_{x,y}\bigg|_0^{2t} - t\right) \cdot 0.4
+        E(I_0, I_1) &= \alpha E_s(I)+(1-\alpha)E_t(I_0, I_1)\\
+        E_s(I_1)      &= \int_x\int_y\left[(L_s\ast I_1)(x,y)-t\right]^2\,dx\,dy\\
+        E_t(I_0, I_1)  &= \int_x\int_y\left[(L_t\ast I_0)(x,y)-(L_t\ast I_1)(x,y)\right]^2\,dx\,dy
     \end{split}
 \end{equation*}
-This gives us fine-grained control of how much we force the lines to adhere to the previous placement.
-Typical values would be in the range $[0.1, 0.6]$.
-When using a bias that is too strong, adding a line at the exact same position only yieldy the target brightness,
-causing a noticeable increase in line density around the footprints.\\
-\subsubsection*{Issues}
-Using only the brightness for coaxing is not ideal.
-This is mainly due to the fact that two neighboring parallel segments will not have the bright spots at their individual center,
-but rather at their combined center.
-Placing new lines there would cause one line to move right into the center of the previous lines,
-introducing a definite jump of both lines and impeding time coherence.
-This effect can be negated by changing the radius $R$ of our low-pass filter we use
-when comparing to the previous frame.
-This means that we cannot reuse $(L\ast I)$ for $E_0$ and $E_1$, and comes at a high cost:
-Since we use two different versions of $L$, and computing $L\ast I$ is by far the most expensive task in this algorithm,
-the runtime will increase by a factor of approximately two.
-We can reduce this cost by changing the computation of the low-pass filter:
-\textit{Implementation?}
+We have found values for $\alpha$ in the range $[0.4, 0.8]$ to be effective.
+Choosing a higher value causes very few lines to be drawn, and just yields some sections due to the inhibitory effect on the lengthen and join operations when leaving the previous line's footprint.
+This gets exacerbated by the gaps between the fragments being cemented in the new $L_t\ast I$, not allowing them to reconnect in subsequent frames.
 
-\begin{minipage}{.5\textwidth}
-    How does choosing the Gauss filter impact the ditches left by time coherence in the field? 
-\end{minipage}
-\begin{minipage}{.5\textwidth}
-    \input{Sources/Diagrams/GaussKernel.tex}
-\end{minipage}
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \includegraphics[scale=.065]{figures/Coaxing/Glyphs.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \includegraphics[scale=.065]{figures/Coaxing/SingleLine0.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \includegraphics[scale=.065]{figures/Coaxing/SingleLine1.png}
+        \caption*{(c)}
+    \end{subfigure}
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \includegraphics[scale=.065]{figures/Coaxing/SingleLine2.png}
+        \caption*{(d)}
+    \end{subfigure}
+    \caption{
+        Lines may diverge from the same origin when using $\alpha=0$. The field in this figure is $steady$.
+        (a): We use the double gyre to show divergent behavior in (d), visualized with an arrow plot.
+        (b): The initial seed and starting line length.
+        (c): Random move and lengthen steps reach a local minimum energy by increasing streamline length, choosing a side at random.
+        (d): A different result may occur with the same starting conditions.
+    }
+    \label[figure]{fig:energydevelopment}
+\end{figure}
+\noindent Since we compare many images and footprints from this subsection onward, it is useful to include a distinction using different color channels.
+To save caption space, we use a consistent coloring to show streamline movement between time frames.
+\textbf{Streamlines} are drawn in white, and we only draw them for the current time step.
+\textbf{Footprints} from the current frame's streamlines are drawn in green, those from the last step in red.
+The higher the intensity of a pixel, the stronger the energy in that region.
+High time coherence therefore leads to most of the image being yellow, with few red or green areas.
+We only draw the footprints obtained using the filter $L_t$, as those from $L_s$ can be easily inferred while
+$L_t$ provides more visual clarity due to the reduced blur radius.
+\begin{leftbar}
+    \noindent \textbf{Note}: The algorithm may perform a combination of move and lengthen operations at once.
+    Even with a constant field, it is possible for streamlines to move around or change their length slightly due to this inherent randomness.
+    % Nonetheless, this section will give an accurate overview of how changing $\alpha$ impacts image quality.
+\end{leftbar}
+
+\noindent We now take a closer look at the energy development for different line positions seen in \cref{fig:energydevelopment} (a-d).
+\noindent We start with a simple, steady field shown in (a), and a constant starting position for every execution at the center (b).
+After 100 optimization steps, the streamline has grown to the maximum length possible (c), thereby reaching a minimum in spatial energy.
+(d): The two likely outcomes of how the starting line develops under the specified starting conditions.
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{.22\textwidth}
+        \centering
+        \includegraphics[scale=.06]{figures/Coaxing/SingleLine2.png}
+        \caption*{(d)}
+    \end{subfigure}
+    \begin{subfigure}{.22\textwidth}
+        \centering
+        \includegraphics[scale=.06]{figures/Coaxing/SingleLineC1.png}
+        \caption*{(e)}
+    \end{subfigure}
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \resizebox{1.08\textwidth}{!}{
+            \input{Sources/Diagrams/CoherenceDiagram1.tex}
+        }
+        \caption*{(f)}
+    \end{subfigure}
+    \begin{subfigure}{.24\textwidth}
+        \centering
+        \resizebox{1.08\textwidth}{!}{
+            \input{Sources/Diagrams/CoherenceDiagram2.tex}
+        }
+        \caption*{(g)}
+    \end{subfigure}
+    \caption{
+        (d): A different result may occur with the same starting conditions, the lengths are invariant in this case.
+        (e): An example for an outcome in favor of temporal energy.
+        (f): Spacial energy vs optimization steps.
+        (g): Temporal energy vs optimization steps.
+    }
+\label[figure]{fig:energydevelopment2}
+\end{figure}
+
+We can see that due to the randomness of the algorithm, there is a $\approx50\%$ chance of ending up on either side of the center ridge (d).
+\newpage
+On \cref{fig:energydevelopment2} (f), we see a plot of the spatial energy vs the current optimization step. The maximum spatial energy equals the image resolution at 120x120.
+Initially, we can see a stark decline in energy for both curves.
+This is caused by to a fast lengthening process, with an average of about 2.5\% image size per step, per side.
+The first plateau phase is reached after $\approx$ 15 steps, as the streamlines reach the edge of the domain and cannot lengthen further.
+Due to the random movements, the line ends drift along the upper and lower domain borders, slowly lengthening due to the curvature.
+A final stronger decline happens at 30 steps for (d), and at 50 steps for (e), as the curvature is strong enough do allow larger regions of spaces
+to be filled by lengthening once again.
+The delay between (d) and (e) is caused by the random nature of the algorithm, and is equal if both runs use the same seed.
+Our streamline reaches the minimum possible energy of about 12500, with a difference of 1300.
+Since the line length lies at roughly 140px and the filter is about 14px wide (note: $L_t$ as shown is half the size of $L_s$),
+these numbers aren't surprising.
+
+The temporal energy is shown on plot (g), where we can see a stark difference in the development of (d) and (e).
+Many features regarding local rate of change are recognizable in both plots, e.g. the plateau of (e) centered around the 40th step's mark.
+The final temporal difference lies at 1000 vs the spatial difference at 1300, again a result of the reduced filter radius.
+\newpage
+
+\begin{figure}[ht]
+    \centering
+    % 5 x No coherence
+    \begin{subfigure}{\textwidth}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/GyroNC.0000.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0535]{figures/AlphaStudy/GyroNC.0001.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/GyroNC.0002.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/GyroNC.0003.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/GyroNC.0004.png}
+        \end{subfigure}
+        \caption*{(a)}
+    \end{subfigure}
+    % 5 x 1 / 3 coherence
+    \begin{subfigure}{\textwidth}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0515]{figures/AlphaStudy/Gyro13C.0000.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0515]{figures/AlphaStudy/Gyro13C.0001.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0515]{figures/AlphaStudy/Gyro13C.0002.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0515]{figures/AlphaStudy/Gyro13C.0003.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.0515]{figures/AlphaStudy/Gyro13C.0004.png}
+        \end{subfigure}
+        \caption*{(b)}
+    \end{subfigure}
+    % 5 x 2 / 3 coherence
+    \begin{subfigure}{\textwidth}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro23C.0000.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro23C.0001.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro23C.0002.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro23C.0003.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro23C.0004.png}
+        \end{subfigure}
+        \caption*{(c)}
+    \end{subfigure}
+    % 5 x 3 / 3 coherence
+    \begin{subfigure}{\textwidth}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro33C.0000.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro33C.0001.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro33C.0002.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro33C.0003.png}
+        \end{subfigure}
+        \begin{subfigure}{.19\textwidth}
+            \centering
+            \includegraphics[scale=.055]{figures/AlphaStudy/Gyro33C.0004.png}
+        \end{subfigure}
+        \caption*{(d)}
+    \end{subfigure}
+    \caption{
+        Comparison of different $\alpha$ values between the first five steps for an unsteady version of the double gyro field from \cref{fig:energydevelopment}.
+        Each row represents five time steps and for each step, the left vortex moves down by $3\%$ of the image height.
+        (a): With $\alpha=0$ most lines have low coherence and field movement is hard to notice between frames.
+        (b): $\alpha=1/3$, TBD
+        (c): $\alpha=2/3$, Good coherence in most regions, some strong changes remain
+        (d): $\alpha=1$, Even better coherence with only slight changes, even in areas of field movement.
+    }
+\end{figure}
+
+\subsection{Parameter Study for $\alpha$}
+Since $\alpha$ drives how similar we want our images to be vs. how much we care about spatial placement and uniformity,
+we briefly look at some examples for extreme cases and more moderate choices, examining some notable differences.
+We start with a double vortex field, where the left vortex undergoes a downward motion. The distance travelled between each time step
+is exactly 3\% of the image height.\\
+In figures (a - d), we set $\alpha=0$, and the streamlines move sporadically with time coherence only being achieved by chance
+and in areas almost completely unaffected by the change.
+For (e - h), $\alpha=1/3$. We can immediately see some improvements, as the center is becoming more stationary.
+The footprints overall gain a more compact appearance, as green and yellow parts aren't as far apart as they were previously.
+The optimal range is reached somewhere around $\alpha=2/3$ (i - l), 
+most of the footprints are now yellow with only slight divergence in areas not affected by the $y$-shift of the vortex.
+At the same time, we preserve an even appearance of line spacing without particularly bunched or sparse areas.
+For high values of $\alpha$ (m-p), we can tell that the image has become a lot worse compared to before.
+We see large empty spaces, where lines cannot be drawn anymore due to the strong energy punishment inflicted by $E_t$ having such high weight.
+These spaces can only increase in size as lines cannot grow past the previous footprint.
+If the field changes further, the line length decreases in order to still fit the footprint left behind, causing less overall line presence every step.
+We conclude that a good starting value for $\alpha$ would be in the $[0.5, 0.75]$ range.
+This avoids the sharp decline in spatial quality, while still retaining good control over the placement to make the streamlines remain time coherent.
+
+% An example for the coloring and $\alpha=0$ can be seen in \cref{fig:paramstudy1} (b-d).
+% The divergence between the new and old streamline happens due to there not being any bias,
+% therefore the slight changes made from random movement decide which side of the gyre it ends up on.
+% In \cref{fig:paramstudy1} (e) we see the same line being generated for two successive frames.
+% Because of the slight bias from the overlap of the initial seed (b) and the previous finished streamline's footprint,
+% we have a gradient to move along toward better placement w.r.t time coherence.
+% We have generated (e) 20 times, 18 of which ending up on the right.
+% This small inaccuracy is a direct result from 
 
 
-\subsubsection*{Combined}
-\begin{minipage}{.55\textwidth}
-    Combining shattering and coaxing, we obtain a somewhat reliable way of generating streamlines according to the footprint left behind by the last frame.
-    The seeds created during the shatter process all lie inside the "valley" left behind by the previous streamline path.
-    Due to the coaxing function of the modified energy measure,
-    it is unlikely that they will leave this valley without a change in the field forcing them to.
-\end{minipage}
-\begin{minipage}{.45\textwidth}
-    \includegraphics{figures/SL_bump2.png}
-    \captionof{figure}{The Fragments' seeds (magenta) "trapped" inside the footprint of previous line}
-\end{minipage}
+% Seeds resulting from shattering are shown in magenta, and are drawn after the footprints.
+
+
+% \subsubsection*{Issues}
+% Using only the brightness for coaxing is not ideal.
+% This is mainly due to the fact that two neighboring parallel segments will not have the bright spots at their individual center,
+% but rather at their combined center.
+% Placing new lines there would cause one line to move right into the center of the previous lines,
+% introducing a definite jump of both lines and impeding time coherence.
+% This effect can be negated by changing the radius $R$ of our low-pass filter we use
+% when comparing to the previous frame.
+% This means that we cannot reuse $(L\ast I)$ for $E_0$ and $E_1$, and comes at a high cost:
+% Since we use two different versions of $L$, and computing $L\ast I$ is by far the most expensive task in this algorithm,
+% the runtime will increase by a factor of approximately two.
+% We can reduce this cost by changing the computation of the low-pass filter:
+
+\newpage
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{.3\textwidth}
+        \centering
+        \includegraphics[scale=.08]{figures/Shatter/3Lines.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.3\textwidth}
+        \centering
+        \includegraphics[scale=.08]{figures/Shatter/15Lines.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.3\textwidth}
+        \centering
+        \includegraphics[scale=.07]{figures/Shatter/3LinesRejoin.png}
+        \caption*{(c)}
+    \end{subfigure}
+    \caption{
+        (a): Three streamlines after being optimized.
+        (b): To make the individual shards visible, we change the field's amplitude slightly.
+        The shards' seeds are the center of the streamlines in (b), and all lie on one of the streamlines in (a).
+        (c): The lines quickly rejoin when re-drawn in the same field used in (a).
+        We used slightly thinner lines to better show the seeds (thin black dots on the streamlines),
+        and to make it more visible that the lines do not simply overlap but actually rejoin.
+    }
+    \label[figure]{fig:rejoin}
+\end{figure}
+
+
+\subsection{Shattering}
+At the end of a time step's optimization phase, we break every streamline apart into smaller streamlets we refer to as \textit{shards}.
+We start by dividing the parent line length-wise into sections which equal the length of the starting lines.
+The shards are assigned a seed in the middle (lengthwise) of these intervals, and their length equals the line start length.
+If the parent line has some length remaining because it was not perfectly divisible by the start length, the last shard's length will be shorter.
+This leaves each former streamline with the appearance of being dashed with each fragment having its own seed, and can be seen in \cref{fig:rejoin} (b).
+The shards then act as the initial seeding strategy for the subsequent timeframe; the regular grid is only used for the first frame.
+This way, we obtain many seeds that, if the field does not change too much, will merge back into the line they came from, as can be seen in \cref{fig:rejoin} (a) and (c),
+saving iterations that would be needed for new seeding and lengthening in these regions.
+If the field \textit{does} change, some segments will still reconnect and therefore keep their temporal coherence,
+whereas areas of strong fluctuation will connect to different seeds.
+This results in changes being limited to parts where a streamline change is necessary,
+providing extra lines in these areas while not affecting streamline trajectory too much on a global level.
+\newpage
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{.32\textwidth}
+        \centering
+        \includegraphics[scale=.08]{figures/TBGyro.png}
+        \caption*{(a)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.32\textwidth}
+        \centering
+        \includegraphics[scale=.08]{figures/TBGyro.png}
+        \caption*{(b)}
+    \end{subfigure}
+    \begin{subfigure}[b]{.32\textwidth}
+        \centering
+        \includegraphics[scale=.08]{figures/TBGyro.png}
+        \caption*{(c)}
+    \end{subfigure}
+    \caption{
+        (a): Two time steps without shattering.
+        (b): Two time steps with shattering.
+        (c): Total energy vs iteration step for (a) and (b).
+    }
+    \label[figure]{fig:combined}
+\end{figure}
+
+\subsection{Combining Shattering and Coaxing}
+Combining shattering and coaxing, we obtain a more reliable way of generating streamlines according to the footprint left behind by the last frame.
+The seeds created during the shatter process all lie inside the footprint left behind by the previous streamline path.
+Due to the coaxing function of the modified energy measure, it is unlikely that they will leave this valley solely due to the random movements of relaxation.
+A change in the field is necessary in order to overcome the weight of the time coherence, making the line move or grow outside the previous footprint.
 Due to the seeds being held in place in this way, it is very likely for them to re-join to form the same lane they originated from.
 If the field changes drastically in this region, the seeds can not fully connect to each other anymore, and will instead gravitate to a different footprint,
-forming long patches of coherent lines with interconnections between different paths.
+forming long patches of coherent lines whenever possible while still allowing relaxation to ensure good spatial distribution.\\
+In \cref{fig:combined} (c),
+we see that joining shards to form the streamlines is significantly faster than generating them anew.
+
+

@@ -7,7 +7,7 @@
       "label": "echo",
       "type": "shell",
     //   "command": "~/Downloads/ParaView-5.12.0-MPI-Linux-Python3.10-x86_64/bin/paraview",
-      "command": "python3.10 test.py",
+      "command": "python.exe test.py",
 
       "problemMatcher": [],
       "group": {
