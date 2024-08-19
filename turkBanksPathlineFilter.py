@@ -27,12 +27,14 @@ np.seterr(divide='ignore', invalid='ignore')
 LOG_PARAMS = True
 LOG_STATS  = True
 
-SHATTER_COHERENCE = False
+CONST_SEEDS       = False
+SHATTER_COHERENCE = True or CONST_SEEDS
 BIAS_COHERENCE    = True
 DRAW_COHERENCE    = SHATTER_COHERENCE or BIAS_COHERENCE
 
 ALLOW_LEN_CHANGE = True
 ALLOW_MOVE       = True
+ALLOW_AUTOREMOVE = True
 
 LINE_REDRAW_COUNTER   = 0
 FILTER_RECALC_COUNTER = 0
@@ -146,7 +148,7 @@ class LPFilterConfig:
     sep_to_blur       : float = 6.0 / 5.0
     filter_radius     : float = 2.0
     sample_radius     : float =  .5
-    line_segment_size : float =  .01
+    line_segment_size : float =  .005
     @property
     def blur_min(self)      : return self.filter_radius
     @property
@@ -158,7 +160,7 @@ class LPFilterConfig:
     @property
     def join_dist(self)     : return self.separation  * self.sep_to_blur
     @property
-    def filter_xsize(self)  : return self.sep_to_blur * self.filter_radius / self.separation
+    def filter_xsize(self)  : return math.ceil(self.sep_to_blur * self.filter_radius / self.separation)
 
 
 class LPFilterTarget:
@@ -332,18 +334,28 @@ class LowPassFilter:
         start_len = self._head_config.line_start_len
         seg_size = self._head_config.line_segment_size
         shards:list[Streamline] = []
-        for line in self._lines.values():
-            line_len = line.ptcount * seg_size
-            shard_count = math.ceil(line_len / start_len)
-            split_pts = np.array_split(line.points, shard_count, axis=1)
-            for pts in split_pts:
-                center_idx = pts.shape[1] // 2
-                shard = Streamline(
-                    (pts.shape[1] - center_idx) * seg_size,
-                    center_idx * seg_size
-                )
-                shard.seed = pts[...,center_idx].T
-                shards.append(shard)
+        # split the lines into many smaller shards
+        if not CONST_SEEDS:
+            for line in self._lines.values():
+                line_len = line.ptcount * seg_size
+                shard_count = math.ceil(line_len / start_len)
+                split_pts = np.array_split(line.points, shard_count, axis=1)
+                for pts in split_pts:
+                    center_idx = pts.shape[1] // 2
+                    shard = Streamline(
+                        (pts.shape[1] - center_idx) * seg_size,
+                        center_idx * seg_size
+                    )
+                    shard.seed = pts[...,center_idx].T
+                    shards.append(shard)
+        # or keeping using the lines the way they are
+        else:
+            for line in self._lines.values():
+                len_half = (line.forward_length + line.backward_length / 2)
+                line_center_seed = line.points[:, line.ptcount//2].T.copy()
+                new_line = Streamline(len_half, len_half)
+                new_line.seed = line_center_seed
+                shards.append(new_line)
         return shards
 
     def add_line(self, line:Streamline, force=False):
@@ -355,37 +367,7 @@ class LowPassFilter:
         self._assert_needs_accept_or_reject()
         return self._change_lines(remove_line=line)
 
-    def move(self, line:Streamline, offset:np.ndarray):
-        self._assert_needs_accept_or_reject()
-        new_line = Streamline(line.forward_length, line.backward_length)
-        new_line.seed = line.seed + offset
-        self.update_line(new_line)
-        return self._change_lines(add_line=new_line, remove_line=line)
-
-    def change_length(self, line:Streamline, front:bool, lengthen:bool):
-        self._assert_needs_accept_or_reject()
-        if line.ptcount < 3 and not lengthen:
-            self._lines.pop(id(line))
-            return True
-        copied_line = line.duplicate(full=True)
-        new_point = None
-
-        if lengthen:
-            if front:
-                insert_idx = -1
-                self.tbpfilter.stracer.SetIntegrationDirectionToForward()
-            else:
-                insert_idx = 0
-                self.tbpfilter.stracer.SetIntegrationDirectionToBackward()
-            new_point, new_velocity = self.tbpfilter.integrate_line_vtk(copied_line.points[insert_idx], 0)
-            if new_point.shape[0] < 2:
-                return None
-            copied_line.do_single_change(front, new_point[1:], new_velocity[1:])
-        else:
-            copied_line.do_single_change(front)
-        return self._change_lines(add_line=copied_line, remove_line=line)
-    
-    def move_and_change_length(self, line:Streamline, move:bool, front:bool, lengthen:bool, change_both:bool=False, recommended_move=None):
+    def move_and_change_length(self, line:Streamline, move:bool, front:bool, lengthen:bool, change_both:bool=False, recommended_move=None, auto_revert=True):
         ############## len change hella weird
         #   if (change & ALL_LEN) {
         #     len1 = len1_orig + delta_length1 * 2 * (drand48() - 0.5);
@@ -433,7 +415,7 @@ class LowPassFilter:
             new_line.forward_length = l1
             new_line.backward_length = l2
         self.update_line(new_line)
-        return self._change_lines(add_line=new_line, remove_line=line, drop_on_improve=True, auto_revert=True)
+        return self._change_lines(add_line=new_line, remove_line=line, drop_on_improve=ALLOW_AUTOREMOVE, auto_revert=auto_revert)
 
     def get_join_candidates(self):
         """Get pairs of lines that can be joined head -> tail."""
@@ -474,7 +456,7 @@ class LowPassFilter:
         self._change_lines(add_line=combined, auto_revert=False)
         self._on_reject = lambda: self._reset_merge(combined, l1, l2)
         add_energy = self.energy_function()
-        if add_energy < energy or (add_energy - energy) < (delete_energy - energy) * .65:
+        if add_energy < energy or (add_energy - energy) < (delete_energy - energy) * 0.75:
             self.accept()
             return combined
         # print("Un-Joining", l1_start, l2_end, combined.seed, combined.forward_length, combined.backward_length, add_energy, energy, delete_energy)
@@ -801,7 +783,7 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         self.hi_bounds = np.array(vtk_bounds[1::2], dtype=np.float32)
         self.delta_bounds = self.hi_bounds - self.lo_bounds
 
-        self._inital_config = LPFilterConfig(separation=0.1, filter_radius=10, line_segment_size=0.01)
+        self._inital_config = LPFilterConfig(separation=0.035, filter_radius=8, line_segment_size=0.0075)
 
         ### Obtain the aspect ratio
         self.filter_stack.xsize = self._inital_config.filter_xsize
@@ -814,6 +796,8 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         outInfo0.Set(SDDP.WHOLE_EXTENT(), *vtk_extent)
         outInfo1 = outInfo.GetInformationObject(1)
         outInfo1.Set(SDDP.WHOLE_EXTENT(), 0, self.rasterx-1, 0, self.rastery-1, 0, 0)
+
+        np.random.seed(0)
         return 1
 
     def RequestData(self, request:vtk.vtkInformation, inInfo:tuple[vtk.vtkInformationVector], outInfo:vtk.vtkInformationVector):
@@ -829,11 +813,11 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
             # the filter_xsize, defined as sep_to_blur * filter_radius / separation
             # must equal the other configs' size, otherwise an exception is raised.
             default = configs[-1]
-            _coh_factor = 2
+            _coh_radius_factor = .5
             time_config:LPFilterConfig = replace(
                 default,
-                sep_to_blur=default.sep_to_blur * _coh_factor,
-                filter_radius=default.filter_radius / _coh_factor
+                sep_to_blur=default.sep_to_blur / _coh_radius_factor,
+                filter_radius=default.filter_radius * _coh_radius_factor
             )
             configs.append(time_config)
         self.filter_stack.push_filter(self.filter_stack.new_filter(configs))
@@ -865,10 +849,10 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         outImageData.SetSpacing(1/(self.rasterx-1), 1/(self.rastery-1) * self.filter_stack.aspect_ratio, 1)
 
         # Sometimes, we want to automatically reset for the first frame
-        if timestep is not None and timestep < 1e-6:
-            print("Reset for first frame.")
-            self.filter_stack.old_filter = None
-            self.shards = None
+        # if timestep is not None and timestep < 1e-6:
+        #     print("Reset for first frame.")
+        #     self.filter_stack.old_filter = None
+        #     self.shards = None
         
 
         #### Some Information
@@ -945,11 +929,12 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         # blended.save(f"/home/alba/projects/Streamlines/graphics/{timestep}.png")
         return 1
 
-    def minimize_energy(self, max_iterations=750, allow_generation=True, allow_birth=True):
-        np.random.seed(0)
-        global LINE_REDRAW_COUNTER, FILTER_RECALC_COUNTER, ALLOW_LEN_CHANGE, ALLOW_MOVE
+    def minimize_energy(self, max_iterations=5000, allow_generation=True, allow_birth=True):
+        global LINE_REDRAW_COUNTER, FILTER_RECALC_COUNTER, ALLOW_LEN_CHANGE, ALLOW_MOVE, ALLOW_AUTOREMOVE
         ALLOW_LEN_CHANGE = True
-        ALLOW_MOVE = True
+        ALLOW_MOVE = (not CONST_SEEDS) or ((CONST_SEEDS) and (self.shards is None))
+        ALLOW_AUTOREMOVE = (not CONST_SEEDS) or ((CONST_SEEDS) and (self.shards is None))
+        allow_birth = (not CONST_SEEDS) or ((CONST_SEEDS) and (self.shards is None))
         active_filter = self.filter_stack.active_filter
         iterations = 0
         t1 = time.time()
@@ -1027,7 +1012,7 @@ class TurkBanksPathlineFilter(VTKPythonAlgorithmBase):
         delta = (d_x) / xcount
         if SHATTER_COHERENCE and self.shards is not None:
             for shard in self.shards:
-                grid.add_line(shard)
+                grid.add_line(shard, force=CONST_SEEDS)
         else:
             if random_placement:
                 total_count = 300 # xcount * ycount

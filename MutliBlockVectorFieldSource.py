@@ -353,3 +353,53 @@ class WavesVectorFieldSource(VectorFieldSourceBase):
     
     def timestep_generator(self):
         yield [0]
+
+@smproxy.source(label="Spiral Sink Vector Field Source")
+@smproperty.input(name="Input")
+class SpiralSinkVectorFieldSource(VectorFieldSourceBase):
+    def __init__(self):
+        from vectorFieldDefs import SpiralSinkVectorField
+        super().__init__(SpiralSinkVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
+        self._vectorFieldDef: SpiralSinkVectorField
+    
+    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
+    def SetBounds(self, x, y, z):
+        self._bounds = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
+    def SetDimensions(self, x, y, z):
+        self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Y-Shear", default_values=[1.0])
+    def SetXShear(self, xshear:float):
+        self._vectorFieldDef._xshear = xshear
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Sink Position", default_values=[0.0, 0.0, 0.0])
+    def SetSinkPosition(self, x, y, z):
+        self._vectorFieldDef.sink_position = np.array([x,y,z])
+        self.Modified()
+   
+    @smproperty.xml("""
+    <IntVectorProperty name="PadData"
+        label="Constrain to XY-Plane"
+        command="SetConstrainTo2D"
+        number_of_elements="1"
+        default_values="1">
+        <BooleanDomain name="bool" />
+    </IntVectorProperty>
+    """)
+    def SetConstrainTo2D(self, val):
+        '''Set attribute to signal whether data should be padded when RequestData is called
+        '''
+        self.constrain_to_2d = bool(val)
+        self.points = self._generate_points()
+        self.Modified()
+    
+    def timestep_generator(self):
+        yield [0]

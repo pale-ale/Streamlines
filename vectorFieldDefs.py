@@ -142,7 +142,25 @@ class WavesVectorField(VectorFieldBase):
         vecs = np.zeros_like(ps)
         period_len = self._frequency * 2 * np.pi
         xvals = self._xspeed
-        yvals = np.sin((ps[:,0] + self._offset + t) * period_len) * self._magnitude
+        yvals = np.sin((ps[:,0] + self._offset) * period_len) * self._magnitude
         vecs[:,0] = xvals
         vecs[:,1] = np.where( (self._lcutoff < ps[:,0]) & (ps[:,0] < self._rcutoff), yvals, 0)
         return vecs
+
+
+class SpiralSinkVectorField(VectorFieldBase):
+    _xshear = 1.0
+    _sink_position = np.zeros(3, dtype=float)
+    
+    def get_vector(self, ps: ndarray, t:float) -> ndarray:
+        mat = np.array([[-self._xshear, -1, 0], [self._xshear, -1, 0], [0, 0, 1]]).T
+        return (ps + self._sink_position) @ mat
+
+    @property
+    def sink_position(self) -> ndarray:
+        return self._sink_position
+    
+    @sink_position.setter
+    def sink_position(self, new_sink_position: ndarray):
+        assert new_sink_position.shape == (3,), "Sink position must be a (3,)-ndarray but is of shape %s" % str(new_sink_position.shape)
+        self._sink_position = new_sink_position
