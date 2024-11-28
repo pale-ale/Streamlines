@@ -133,15 +133,21 @@ class RotatingVectorFieldSource(VectorFieldSourceBase):
         super().__init__(RotatingVectorField(), 0, "vtkDataObject", 1, "vtkImageData", bounds=(1,1,1), dimensions=(10,10,1))
         self._vectorFieldDef: RotatingVectorField
     
-    @smproperty.doublevector(Name="Bounds", default_values=[10.0, 10.0, 0.0])
+    @smproperty.doublevector(Name="Bounds", default_values=[1.0, 1.0, 0.0])
     def SetBounds(self, x, y, z):
         self._bounds = np.array([x,y,z])
         self.points = self._generate_points()
         self.Modified()
     
-    @smproperty.intvector(Name="Dimensions", default_values=[11, 11, 1])
+    @smproperty.intvector(Name="Dimensions", default_values=[21, 21, 1])
     def SetDimensions(self, x, y, z):
         self._dimensions = np.array([x,y,z])
+        self.points = self._generate_points()
+        self.Modified()
+    
+    @smproperty.doublevector(Name="Center", default_values=[0.5, 0.5, 0.0])
+    def SetCenter(self, x, y, z):
+        self._vectorFieldDef.center = np.array([x,y,z])
         self.points = self._generate_points()
         self.Modified()
     

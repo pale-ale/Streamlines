@@ -3,6 +3,7 @@ animations
 HotRoom2D
 *.pyc
 scrapped
+*.png
 
 
 ### Latex stuff

@@ -14,7 +14,7 @@ class VectorFieldBase():
 
 class StraightVectorField(VectorFieldBase):
     def __init__(self) -> None:
-        self.direction = np.array([1.0, 0.0, 0.0])
+        self._direction = np.array([1.0, 0.0, 0.0])
     
     @property
     def direction(self):
@@ -30,11 +30,23 @@ class StraightVectorField(VectorFieldBase):
 
 
 class RotatingVectorField(VectorFieldBase):
+    def __init__(self) -> None:
+        self._center = np.array([.5, .5, 0])
+
+    @property
+    def center(self):
+        return self._center
+    
+    @center.setter
+    def center(self, new_center: ndarray):
+        assert new_center.shape == (3,), "Center must be a (3,)-ndarray but is of shape %s" % str(new_center.shape)
+        self._center = new_center
+
     def get_vector(self, ps:ndarray, t:float):
-        xs = -ps[:, 1]
-        ys = ps[:, 0]
+        xs = -(ps[:, 1] - self._center[1])
+        ys =   ps[:, 0] - self._center[0]
         zs = np.zeros_like(xs)
-        return np.vstack((xs, ys, zs))
+        return np.vstack((xs, ys, zs)).T
 
 
 class SourceVectorField(VectorFieldBase):
