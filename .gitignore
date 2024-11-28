@@ -4,7 +4,7 @@ HotRoom2D
 *.pyc
 scrapped
 *.png
-
+CMakeFiles
 
 ### Latex stuff
 *.aux

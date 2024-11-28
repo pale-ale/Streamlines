@@ -1,0 +1,3 @@
+set(classes FilterConfig FilterPainter FilterStack FilterTarget LowPassFilter Oracle Streamline VectorField vtkTurkBanksStreamlineFilter)
+vtk_module_add_module(TurkBanksStreamlineFilterSources CLASSES ${classes})
+paraview_add_server_manager_xmls(XMLS  TurkBanksStreamlineFilter.xml)

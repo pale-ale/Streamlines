@@ -1,0 +1,117 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="filters">
+    <SourceProxy name="TurkBanksFilter" class="vtkTurkBanksStreamlineFilter" label="Turk Banks Streamline Filter">
+      <Documentation
+        short_help="Live source."
+        long_help="Live source dummy.">
+      </Documentation>
+
+      <InputProperty
+        name="Vector Field Data"
+        port_index="0"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="filters"/>
+          <Group name="sources"/>
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkImageData"/>
+        </DataTypeDomain>
+        <Documentation>
+          Set the vector field we create streamlines in.
+        </Documentation>
+      </InputProperty>
+
+      <IntVectorProperty
+         name="Iterations"
+         label="Iterations"
+         command="SetIterations"
+         number_of_elements="1"
+         animateable="0"
+         default_values="100" >
+      </IntVectorProperty>
+      <DoubleVectorProperty
+         name="JoinDistanceFactor"
+         label="Join Distance Factor"
+         command="SetJoinDistanceFactor"
+         number_of_elements="1"
+         animateable="0"
+         default_values="1.0" >
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="Separation"
+         label="Separation"
+         command="SetSeparation"
+         number_of_elements="1"
+         animateable="1"
+         default_values="0.04" >
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="BirthThreshold"
+         label="Birth Threshold"
+         command="SetBirthThreshold"
+         number_of_elements="1"
+         animateable="0"
+         default_values="0.0" >
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="IntegrationStepSize"
+         label="Integration Step Size"
+         command="SetIntegrationStepSize"
+         number_of_elements="1"
+         animateable="0"
+         default_values="0.005" >
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="CoherenceWeight"
+         label="Coherence Weight"
+         command="SetCoherenceWeight"
+         number_of_elements="1"
+         animateable="0"
+         default_values="0.5">
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="ResolutionFactor"
+         label="Resolution Factor"
+         command="SetResolutionFactor"
+         number_of_elements="1"
+         animateable="0"
+         default_values="1.0">
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         name="TemporalFilterRadius"
+         label="Temporal Filter Radius"
+         command="SetTemporalFilterRadius"
+         number_of_elements="1"
+         animateable="0"
+         default_values="0.7">
+      </DoubleVectorProperty>
+      <DoubleVectorProperty
+         information_only="1"
+         name="TimestepValues"
+         repeatable="1">
+         <Documentation>
+             Available timestep values.
+         </Documentation>
+      </DoubleVectorProperty>
+      <IntVectorProperty name="Enable Shattering"
+                    command="SetbShatter"
+                    number_of_elements="1"
+                    default_values="1">
+        <BooleanDomain name="bool"/>
+      </IntVectorProperty>
+      <IntVectorProperty name="SingleFrameMode"
+                    command="SetSingleFrameMode"
+                    number_of_elements="1"
+                    default_values="1">
+        <BooleanDomain name="bool"/>
+      </IntVectorProperty>
+      <Property name="Write Temporal Data" command="WriteTemporalData" panel_widget="command_button"/>
+      <Property name="Clear Data" command="ClearData" panel_widget="command_button"/>
+      <Property name="Shatter" command="Shatter" panel_widget="command_button"/>
+      <OutputPort name="Streamlines" index="0"/>
+      <OutputPort name="Energy Map"  index="1"/>
+      <OutputPort name="Temporal Map"  index="2"/>
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>

@@ -1,0 +1,8 @@
+NAME
+  TurkBanksStreamlineFilterSources
+DEPENDS
+  VTK::FiltersCore
+PRIVATE_DEPENDS
+  VTK::CommonCore
+  VTK::CommonDataModel
+  VTK::FiltersFlowPaths

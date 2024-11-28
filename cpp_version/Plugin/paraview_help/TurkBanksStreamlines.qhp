@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+  <namespace>TurkBanksStreamlines.org</namespace>
+  <virtualFolder>TurkBanksStreamlines</virtualFolder>
+  <filterSection>
+    <toc>
+  <section title="TurkBanksStreamlines" ref="sources.EmulatedTimeDummySource.html">
+    <section title="EmulatedTimeDummySource" ref="sources.EmulatedTimeDummySource.html" />
+    <section title="Live Souce (dummy)" ref="sources.LiveSourceDummy.html" />
+  </section>
+</toc>
+    <keywords>
+      <!-- TODO: how to handle keywords? -->
+    </keywords>
+    <files>
+      <file>sources.EmulatedTimeDummySource.html</file>
+      <file>sources.LiveSourceDummy.html</file>
+
+    </files>
+  </filterSection>
+</QtHelpProject>

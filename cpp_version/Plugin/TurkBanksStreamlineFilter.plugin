@@ -1,0 +1,7 @@
+NAME
+  TurkBanksStreamlineFilter
+DESCRIPTION
+  A plugin that adds a streamline filter using Turk and Banks' algorithm, extended with time coherence.
+REQUIRES_MODULES
+  VTK::CommonDataModel
+  VTK::FiltersCore

@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/alba/paraview/VTK/**",
+                "/home/alba/paraview_build/VTK/**",
+                "/home/alba/paraview/VTK/ThirdParty/nlohmannjson",
+                "/home/alba/paraview_build/VTK/Common/Core",
+                "/home/alba/paraview/VTK/Common/ExecutionModel"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
