@@ -3,36 +3,73 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Grmmarly'd
+Vector field visualization is a ubiquitous component encountered in many processes used by science and industry alike,
+such as aerospace engineering, geology, fluid dynamics, material science, or the biomedical sector.
+Frequent use cases for vector fields include weather systems, rotor design,
+analysis of marker movement inside a cell, or predicting the magnetic field of a star.
+Displaying such fields in a human-focused way is invaluable when analyzing the
+underlying systems' dynamics, allowing for faster and more accurate data analysis
+and subsequent decision-making.
+Contemporary research has a primary focus on continuous and steady vector fields.
+Streamlines are usually optimized w.r.t. a single frame, allowing for e.g.,
+a spatially uniform and therefore visually pleasing streamline placement.
 
-The visualization of vector fields is a heavily used component in many fields like aerospace engineering, geology, fluid dynamics, material science, or the biomedical sector.
-Common examples include weather systems, rotor design, analysis of marker movement inside of cells, or the magnetic field of a star.
-Displaying such fields in a human-focused way is invaluable when analyzing the underlying systems' dynamics, and allows for faster and more accurate data analysis.
+A problem arises when small changes over time are introduced, i.e.,
+an unsteady vector field is used instead of a steady one.
+While current algorithms still produce good images frame by frame,
+it is unlikely for these algorithms to prefer streamlines similar to the ones in the previous frame.
+Due to this, streamlines move about and shift between frames a lot more than the time-induced changes to the field would warrant,
+with the sporadic movement making it very difficult to perceive the flow change of the field.
+Creating an animation of an unsteady vector field's behavior thus requires frequent human intervention,
+which makes good animations very tedious, time-consuming, and ultimately expensive.
+Most vector fields represent dynamic systems, which makes many areas susceptible to this limitation.
 
-Contemporary research is mostly focused on continuous and steady vector fields.
-Lines are usually optimized with respect to a single frame, which in turn has a very pleasing appearance.
-If we introduce small changes over time, i.e. use an unsteady vector field, it is unlikely those algorithms will prefer lines similar to the ones in the last frame.
-This causes the streamlines to move about and shift between frames a lot more than the time-induced changes to the field would warrant.
-The sporadic movement makes it very difficult to perceive the flow change of the field.
-Therefore, creating an animation of an unsteady vector field's behavior is very difficult,
-time-consuming, and requires a lot of human intervention in order to achieve good results.
-This is extremely limiting, as most (if not all) vector fields represent a dynamic system.
-Therefore, the focus of this thesis will be threefold:
+We believe that by introducing a new criterion that describes how much streamlines move from one frame to another,
+we can quantify the visual fidelity of streamline placements generated for different frames.
+In this thesis, we will refer to this criterion as \textit{time coherence}, indicating that
+the objective is to constrain streamline movement from one frame to the next to ensure
+that the human eye perceives the ``movement'' of a streamline as one fluid motion
+through several frames.
+\newpage
+
+This paper will focus on three core aspects revolving around time coherence:
 \begin{itemize}
-    \item How a lack of coherence of streamlines in different time steps of a continuous, unsteady field affects the visual quality of a field.
-    A criterion to measure time coherence will also be presented.
-    \item The implementation and underlying ideas of an image-based algorithm generating evenly-spaced long streamlines.
-    \item Adaptations of the algorithm to allow a controlled bias between similarity to a previous time step, and optimality w.r.t. the current step.
+    \item A motivation for---and definition of---time coherence by deriving
+    a measure from simple cases lacking time coherence.
+    \item The implementation and underlying ideas of an image-based algorithm generating
+    evenly-spaced long streamlines, which we use as the basis for our implementation.
+    \item Adaptations of the base algorithm to allow a controlled bias between similarity
+    to a previous time step, and optimality w.r.t. the spatial layout for the current step.
+    We show how time coherence can be added in a non-intrusive,
+    compatible way to combine it with spatial coherence.
 \end{itemize}
-We have chosen an image-based approach (opposed to a feature-guided one, see Section 2 for a disambiguation) for our work,
-because the movement of lines in-between time frames is better suited for an appearance-focused algorithm.
-Another reason is that feature-guided algorithms usually act locally, whereas the movement of a line from one step to another
-is a global constraint.
+We have chosen an image-based approach
+(as opposed to a feature-guided one, see \Cref{sec:relatedWork} for a disambiguation) for our work
+because the movement of streamlines between time frames is an appearance-focused problem,
+and therefore better suited by an appearance-focused algorithm.
+Another reason is that feature-guided algorithms usually act locally,
+whereas the movement of a line from one step to another is a global constraint.
+
 The succeeding sections are structured as follows:
-\begin{description}
-    \item [Chapter 2] presents some recent developments and concepts.
-    \item [Chapter 3] contains fundamentals about vector fields and streamlines.
-    \item [Chapter 4] is about the base algorithm, the definition of a criterion for time coherence, and changes made to account for time coherence.
-    \item [Chapter 5] contains the implementation and some design ideas.
-    \item [Chapter 6] examines the individual changes' effects on different datasets, and we discuss issues, performance, and other measurements.
-    \item [Chapter 7] concludes the thesis with some ideas for future work and improvements.
-\end{description}
+In \Cref{sec:relatedWork}, we briefly note and classify some groups of algorithms,
+and describe how our algorithm fits into these surroundings.
+The fundamentals, mostly in the areas of vector field visualization and image processing, are
+provided in \Cref{sec:fundamentals}.
+\Cref{sec:method} starts with a brief segment about a discontinued heuristic algorithm,
+followed by a close examination of the image-guided algorithm we then decided to use as a foundation.
+Time coherence is motivated and explained in greater detail,
+with initial ideas regarding its implementation laid out, then executed in \Cref{sec:implementation}.
+\Cref{sec:results} contains our findings and ideas for future work,
+with \Cref{sec:conclusion} concluding this thesis.
+
+
+% \paragraph*{Related Work, Chapter 2} We present some recent developments and concepts.
+% \paragraph*{Fundamentals, Chapter 3} Fundamentals about vector fields and streamlines are listed and briefly explained.
+% \paragraph*{Method, Chapter 4} The base algorithm is introduced alongside the definition of a
+% criterion for time coherence. Changes made to the algorithm on account for time coherence are discussed.
+% \paragraph*{Implementation, Chapter 5} We describe the implementation and some design ideas.
+% \paragraph*{Results, Chapter 6} We compare different algorithms on several datasets, and we discuss limitations,
+% algorithm performance, and its complexity.
+% \paragraph*{Conclusion, Chapter 7} In the final chapter, we conclude the thesis with
+% a brief summary of the presented topics and some ideas for future work.

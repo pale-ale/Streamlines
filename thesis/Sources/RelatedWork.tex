@@ -1,31 +1,57 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Related Work}
-\label{sec:relatedWork}
+\label[section]{sec:relatedWork}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Most of the works published in the field of streamline placement algorithms can be divided into two categories:
-\subsection{Image-Guided}
-The goal of this approach is to achieve a very uniform spacing of lines, giving an almost "hand-drawn" appearance.
-Generated images will usually have high visual quality, at the risk of potentially missing or misrepresenting important features.
-\\\\
-One of the first and most prominent examples in this category was written by Greg Turk and David Banks~\cite{TurkBanks},
+Most of the work published in the field of streamline placement algorithms can be divided into three categories,
+each having different focuses, strengths, and drawbacks.
+Each category will be briefly addressed in the following sections.
+
+\section{Image-Guided Algorithms}
+The goal of this approach is to achieve a very uniform spacing of streamlines,
+giving an almost "hand-drawn" appearance.
+Generated images will usually have high visual quality,
+at the risk of potentially missing or misrepresenting features and higher computational cost.
+
+One of the first and most prominent examples in this category was created
+by Greg Turk and David Banks~\cite{TurkBanks} in 1996,
 which we have adopted as the base for our algorithm as well.
-In their research paper, a function (called the "Energy Function") is defined such that it maps an input image containing the potential streamlines to a scalar.
-The scalar represents the quality of the image, roughly defined as the uniformity of the gray scales it contains. 
-Adding/moving/removing/resizing streamlines is done randomly, at every step the energy function is used to determine whether a change gets accepted or discarded.
-The algorithm is finished when the energy function reaches a lower energy bound, or a maximum number of consecutive rejected steps is exceeded.
+In their research paper, a function (called the ``Energy Function'')
+is defined such that it maps an input image containing the potential streamlines to a scalar.
+The scalar represents the quality of the image, roughly defined as the uniformity of the streamline spacing. 
+Adding/moving/removing/resizing streamlines is done randomly,
+at every step the energy function is used to determine whether a proposed change gets accepted or discarded.
+The algorithm is finished when the energy function reaches a lower energy bound or the user stops it.
+This idea was extended by \cite{https://doi.org/10.1111/j.1467-8659.2009.01352.x} to allow
+streamline generation on 3D surfaces.
+Another image-guided approach, which is also view-dependent for 3D fields, was created by
+\cite{8093671}.
 
 
-\subsection{Feature-Guided}
-Feature-Guided algorithms examine the underlying field structure before placing seeds.
-They search for critical points or patterns in the field and then seed around them, capturing them in much higher detail.
-The resulting images inherently represent the critical points much better, at the cost of some visual appeal compared to the aforementioned group.
-\bigskip
+\section{Feature-Guided Algorithms}
+Feature-guided algorithms examine the underlying field structure when placing seeds.
+They search for critical points or patterns in the field and then seed around them,
+capturing them in much higher detail.
+The resulting images inherently represent the critical points much better,
+sometimes at the cost of visual appeal compared to image-guided algorithms.
+\cite{Verma} is one of the first algorithms in this category, extracting field topology
+and then applying a fixed pattern of seeds for the different structures to capture them
+as accurately as possible.
+\cite{1532832} developed a farthest-point seeding strategy using Delaunay triangulation
+for fast seed positioning.
+\cite{wu2009topology} picks up on this idea, improving it to generate better images still adhering
+to the underlying topology.
 
-\subsection{Other Relevant Works}
-\begin{itemize}
-    \item \href{https://www.cs.purdue.edu/homes/xmt/papers/Coherent-Streamline_Tsinghua_2012.pdf}{Time Coherence in 2D}
-    \item \href{https://www.cg.tuwien.ac.at/courses/Visualisierung1/2015W/exercises/Streamlines_Jobard&Lefer.pdf}{Approach I've used so far due to simplicity}
-\end{itemize}
+\section{Greedy Algorithms}
+Greedy algorithms do not use a global guiding principle for streamline placement.
+We used an approach similar to \cite{Jobard} as a prototype,
+placing seed candidates along a generated line and attempting to grow streamlines 
+from them until the space is filled.
+\cite{4015453} later improved this algorithm's speed by an order of magnitude.
+\cite{Mattausch} extended this principle into 3D,
+adding several features to make it more suitable for user interaction and 3D rendering.
 
-Do not forget to use references~\cite{Hanser2019energy} like done here~\cite{Hofmann2019dependentVectors} to enable the bibliography~\cite{Jung2017tumble, Sagrista2019GaiaSky, Sdeo2018fullerene, Zheng2019equivalence}.
+
+
+
+

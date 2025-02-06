@@ -19,294 +19,390 @@
 
 \refsection{0}
   \datalist[entry]{anyt/global//global/global/global}
-    \entry{TurkBanks}{inproceedings}{}{}
-      \field{labelalpha}{96}
-      \field{sortinit}{9}
-      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
-      \field{labeltitlesource}{title}
-      \field{title}{Image-Guided Streamline Placement}
-      \field{year}{1996}
-    \endentry
-    \entry{Hanser2019energy}{inproceedings}{}{}
-      \name{author}{6}{}{%
-        {{hash=a829eeddb0f2b5031df441bffdb5910c}{%
-           family={Hanser},
-           familyi={H\bibinitperiod},
-           given={Karsten},
-           giveni={K\bibinitperiod}}}%
-        {{hash=0db267e271a215d235061114d491c425}{%
-           family={Meggendorfer},
-           familyi={M\bibinitperiod},
-           given={Stefan},
-           giveni={S\bibinitperiod}}}%
-        {{hash=f9db836cfbf31533e58832c5b37bf437}{%
-           family={Hügel},
-           familyi={H\bibinitperiod},
-           given={Peter},
-           giveni={P\bibinitperiod}}}%
-        {{hash=2051c220858a4a09685d1cc4abafdfc7}{%
-           family={Fallenbüchel},
-           familyi={F\bibinitperiod},
-           given={Florian},
-           giveni={F\bibinitperiod}}}%
-        {{hash=6e4309b589e76c0cc95a9ca0ef8c3a32}{%
-           family={Fahad},
-           familyi={F\bibinitperiod},
-           given={Hafiz\bibnamedelima Muhammad},
-           giveni={H\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
-      }
-      \strng{namehash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{fullhash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{fullhashraw}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{bibnamehash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{authorbibnamehash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{authornamehash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{authorfullhash}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \strng{authorfullhashraw}{aa6d3dacb8a4b315230061c5cfa2fcf3}
-      \field{labelalpha}{Han+19}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{booktitle}{Proceedings of International Conference on Information Visualization Theory and Applications (IVAPP)}
-      \field{title}{Energy-Based Visualization of 2{D} Flow Fields}
-      \field{year}{2019}
-      \field{pages}{250\bibrangedash 258}
-      \range{pages}{9}
-      \verb{doi}
-      \verb 10.5220/0007359602500258
-      \endverb
-    \endentry
-    \entry{Hofmann2019dependentVectors}{article}{}{}
+    \entry{Jobard}{article}{}{}
       \name{author}{2}{}{%
-        {{hash=93d1ffc990c47fb00d1e24d3bfa20a5b}{%
-           family={Hofmann},
-           familyi={H\bibinitperiod},
-           given={Lutz},
-           giveni={L\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
-      }
-      \strng{namehash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{fullhash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{fullhashraw}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{bibnamehash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{authorbibnamehash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{authornamehash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{authorfullhash}{8a17f0c68585ed0f654d785369fd01fc}
-      \strng{authorfullhashraw}{8a17f0c68585ed0f654d785369fd01fc}
-      \field{labelalpha}{HS19}
-      \field{sortinit}{H}
-      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{journaltitle}{Computer Graphics Forum}
-      \field{number}{3}
-      \field{title}{The Dependent Vectors Operator}
-      \field{volume}{38}
-      \field{year}{2019}
-      \field{pages}{261\bibrangedash 272}
-      \range{pages}{12}
-      \verb{doi}
-      \verb 10.1111/cgf.13687
-      \endverb
-    \endentry
-    \entry{Jung2017tumble}{inproceedings}{}{}
-      \name{author}{7}{}{%
-        {{hash=94f005b733a03b9fcaa3c6984391b844}{%
-           family={Jung},
+        {{hash=9664f5686626168bfaea615455c29d1c}{%
+           family={Jobard},
            familyi={J\bibinitperiod},
-           given={Philipp},
-           giveni={P\bibinitperiod}}}%
-        {{hash=567372a022de390b45ca481490a87fca}{%
-           family={Hausner},
-           familyi={H\bibinitperiod},
-           given={Philip},
-           giveni={P\bibinitperiod}}}%
-        {{hash=9988d7eccf52ad3209d989243b714fdd}{%
-           family={Pilz},
-           familyi={P\bibinitperiod},
-           given={Lukas},
-           giveni={L\bibinitperiod}}}%
-        {{hash=60cfec0c896db52885afbffab8bf88d5}{%
-           family={Stern},
-           familyi={S\bibinitperiod},
-           given={Julien},
-           giveni={J\bibinitperiod}}}%
-        {{hash=2e1f60a1b64f1de4b6daac1a41a15810}{%
-           family={Euler},
-           familyi={E\bibinitperiod},
-           given={Christian},
-           giveni={C\bibinitperiod}}}%
-        {{hash=4a5364a72d319eef74a941bb89ec2217}{%
-           family={Riemer},
-           familyi={R\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
+           given={Bruno},
+           giveni={B\bibinitperiod}}}%
+        {{hash=fa233b37e38406e6d51677fb7f2f63e6}{%
+           family={Lefer},
+           familyi={L\bibinitperiod},
+           given={Wilfrid},
+           giveni={W\bibinitperiod}}}%
       }
-      \strng{namehash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{fullhash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{fullhashraw}{9d6aea7995cb67b74e617548b7863542}
-      \strng{bibnamehash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{authorbibnamehash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{authornamehash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{authorfullhash}{9d6aea7995cb67b74e617548b7863542}
-      \strng{authorfullhashraw}{9d6aea7995cb67b74e617548b7863542}
-      \field{labelalpha}{Jun+17}
+      \strng{namehash}{52713227590750ae39883c9f320b0faf}
+      \strng{fullhash}{52713227590750ae39883c9f320b0faf}
+      \strng{fullhashraw}{52713227590750ae39883c9f320b0faf}
+      \strng{bibnamehash}{52713227590750ae39883c9f320b0faf}
+      \strng{authorbibnamehash}{52713227590750ae39883c9f320b0faf}
+      \strng{authornamehash}{52713227590750ae39883c9f320b0faf}
+      \strng{authorfullhash}{52713227590750ae39883c9f320b0faf}
+      \strng{authorfullhashraw}{52713227590750ae39883c9f320b0faf}
+      \field{labelalpha}{JL97}
       \field{sortinit}{J}
       \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{Proceedings of SIBGRAPI WVIS}
-      \field{title}{Tumble-Vortex Core Line Extraction}
-      \field{year}{2017}
+      \field{isbn}{978-3-211-83049-9}
+      \field{journaltitle}{Proceedings of the eight Eurographics Workshop on visualization in scientific computing}
+      \field{month}{12}
+      \field{title}{Creating Evenly-Spaced Streamlines of Arbitrary Density}
+      \field{volume}{7}
+      \field{year}{1997}
+      \verb{doi}
+      \verb 10.1007/978-3-7091-6876-9_5
+      \endverb
     \endentry
-    \entry{Sagrista2019GaiaSky}{article}{}{}
-      \name{author}{4}{}{%
-        {{hash=7e3797f188ce3952429f82c66691335c}{%
-           family={Sagristà},
-           familyi={S\bibinitperiod},
-           given={Antoni},
-           giveni={A\bibinitperiod}}}%
-        {{hash=51f910a09f58038299b7f361457c1dcc}{%
-           family={Jordan},
-           familyi={J\bibinitperiod},
-           given={Stefan},
-           giveni={S\bibinitperiod}}}%
-        {{hash=c2ad285eb682bccdfe2685694db2188f}{%
-           family={Müller},
+    \entry{4015453}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=00ccaf7b1005d063f991128f164104e3}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Zhanping},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=e89a195d788e603926fe1c2b3afa854f}{%
+           family={Moorhead},
            familyi={M\bibinitperiod},
-           given={Thomas},
-           giveni={T\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=854d2b94ba2220d3675c7313db62703a}{%
+           family={Groner},
+           familyi={G\bibinitperiod},
+           given={Joe},
+           giveni={J\bibinitperiod}}}%
       }
-      \strng{namehash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{fullhash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{fullhashraw}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{bibnamehash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{authorbibnamehash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{authornamehash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{authorfullhash}{c1c0bdca9f18be32ea8db104a987b77e}
-      \strng{authorfullhashraw}{c1c0bdca9f18be32ea8db104a987b77e}
-      \field{labelalpha}{SJMS19}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \strng{namehash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{fullhash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{fullhashraw}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{bibnamehash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{authorbibnamehash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{authornamehash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{authorfullhash}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \strng{authorfullhashraw}{4333f05a2d0ed7b82c8690379ce82fa8}
+      \field{labelalpha}{LMG06}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{IEEE Transactions on Visualization and Computer Graphics}
-      \field{number}{1}
-      \field{title}{{G}aia {S}ky: Navigating the {G}aia Catalog}
-      \field{volume}{25}
-      \field{year}{2019}
-      \field{pages}{1070\bibrangedash 1079}
-      \range{pages}{10}
+      \field{number}{5}
+      \field{title}{An Advanced Evenly-Spaced Streamline Placement Algorithm}
+      \field{volume}{12}
+      \field{year}{2006}
+      \field{pages}{965\bibrangedash 972}
+      \range{pages}{8}
       \verb{doi}
-      \verb 10.1109/TVCG.2018.2864508
+      \verb 10.1109/TVCG.2006.116
+      \endverb
+      \keyw{Streaming media;Visualization;Iterative algorithms;Programmable control;Adaptive control;Polynomials;Interpolation;Error correction;Noise robustness;Pixel;Flow visualization;evenly-spaced streamlines;streamline placement;seeding strategy;closed streamlines.}
+    \endentry
+    \entry{8093671}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=f6919522bcac8957d9abf950cc4822ec}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Liya},
+           giveni={L\bibinitperiod}}}%
+        {{hash=936f45ae9dd073b0a9d0cbde1e8f2864}{%
+           family={Shen},
+           familyi={S\bibinitperiod},
+           given={Han-Wei},
+           giveni={H\bibinithyphendelim W\bibinitperiod}}}%
+      }
+      \strng{namehash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{fullhash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{fullhashraw}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{bibnamehash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{authorbibnamehash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{authornamehash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{authorfullhash}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \strng{authorfullhashraw}{e088f29e0f7faec3b4a78023c4cc5b15}
+      \field{labelalpha}{LS07}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Visualization and Computer Graphics}
+      \field{number}{3}
+      \field{title}{Image-based streamline generation and rendering}
+      \field{volume}{13}
+      \field{year}{2007}
+      \field{pages}{630\bibrangedash 640}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1109/TVCG.2007.8093671
+      \endverb
+      \keyw{Streaming media;Three-dimensional displays;Two dimensional displays;Rendering (computer graphics);Visualization;Aerospace electronics;Data visualization;Three-dimensional flow visualization;streamlines;streamline seeding;level of detail;depth peeling;stylized rendering}
+    \endentry
+    \entry{1532832}{inproceedings}{}{}
+      \name{author}{3}{}{%
+        {{hash=5ceb7f05dbb4b1e8b41a91ccea51f084}{%
+           family={Mebarki},
+           familyi={M\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=0ecc023c157dee95e01a94c68442d4b9}{%
+           family={Alliez},
+           familyi={A\bibinitperiod},
+           given={P.},
+           giveni={P\bibinitperiod}}}%
+        {{hash=ab8c0f1380a5be999ba963a723f2c882}{%
+           family={Devillers},
+           familyi={D\bibinitperiod},
+           given={O.},
+           giveni={O\bibinitperiod}}}%
+      }
+      \strng{namehash}{deab11963671af13bfa21ada6e6df785}
+      \strng{fullhash}{deab11963671af13bfa21ada6e6df785}
+      \strng{fullhashraw}{deab11963671af13bfa21ada6e6df785}
+      \strng{bibnamehash}{deab11963671af13bfa21ada6e6df785}
+      \strng{authorbibnamehash}{deab11963671af13bfa21ada6e6df785}
+      \strng{authornamehash}{deab11963671af13bfa21ada6e6df785}
+      \strng{authorfullhash}{deab11963671af13bfa21ada6e6df785}
+      \strng{authorfullhashraw}{deab11963671af13bfa21ada6e6df785}
+      \field{labelalpha}{MAD05}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{VIS 05. IEEE Visualization, 2005.}
+      \field{title}{Farthest point seeding for efficient placement of streamlines}
+      \field{year}{2005}
+      \field{pages}{479\bibrangedash 486}
+      \range{pages}{8}
+      \verb{doi}
+      \verb 10.1109/VISUAL.2005.1532832
+      \endverb
+      \keyw{Streaming media;Visualization;Containers;USA Councils;Image generation;Optimization methods}
+    \endentry
+    \entry{Mattausch}{inproceedings}{}{}
+      \name{author}{4}{}{%
+        {{hash=fe1f096f8bdefe67d2f768d3a464bb78}{%
+           family={Mattausch},
+           familyi={M\bibinitperiod},
+           given={Oliver},
+           giveni={O\bibinitperiod}}}%
+        {{hash=d7bca631e075192fa171b6a19f2dbcc0}{%
+           family={Theußl},
+           familyi={T\bibinitperiod},
+           given={Thomas},
+           giveni={T\bibinitperiod}}}%
+        {{hash=8f25f539fdf91847d7137085ebf0cd4a}{%
+           family={Hauser},
+           familyi={H\bibinitperiod},
+           given={Helwig},
+           giveni={H\bibinitperiod}}}%
+        {{hash=71ecd248c5469c9e40a8b2272517942f}{%
+           family={Gröller},
+           familyi={G\bibinitperiod},
+           given={Eduard},
+           giveni={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{fullhash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{fullhashraw}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{bibnamehash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{authorbibnamehash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{authornamehash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{authorfullhash}{a5da0d77423e1a83110f4f074a68f4be}
+      \strng{authorfullhashraw}{a5da0d77423e1a83110f4f074a68f4be}
+      \field{labelalpha}{MTHG03}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{05}
+      \field{title}{Strategies for Interactive Exploration of 3D Flow Using Evenly-Spaced Illuminated Streamlines}
+      \field{year}{2003}
+      \verb{doi}
+      \verb 10.1145/984952.984987
       \endverb
     \endentry
-    \entry{Sdeo2018fullerene}{inproceedings}{}{}
-      \name{author}{3}{}{%
-        {{hash=2b552bd0b51b4a3ee975822072f2d56f}{%
-           family={Sdeo},
+    \entry{https://doi.org/10.1111/j.1467-8659.2009.01352.x}{article}{}{}
+      \name{author}{4}{}{%
+        {{hash=a05c1709a7cd7c5832fcbd9483ae4370}{%
+           family={Spencer},
            familyi={S\bibinitperiod},
-           given={Kai},
-           giveni={K\bibinitperiod}}}%
-        {{hash=f4220efc57f9db2871e158b72bf9aa38}{%
-           family={Rieck},
-           familyi={R\bibinitperiod},
-           given={Bastian},
+           given={Benjamin},
            giveni={B\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
+        {{hash=59dd071b19e76f0f77403531d0c28ad2}{%
+           family={Laramee},
+           familyi={L\bibinitperiod},
+           given={Robert\bibnamedelima S.},
+           giveni={R\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=5ed4e36c48f533c473b9881aab0667a1}{%
+           family={Chen},
+           familyi={C\bibinitperiod},
+           given={Guoning},
+           giveni={G\bibinitperiod}}}%
+        {{hash=0623dbc48f17b7ab14cb777bd06359f0}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Eugene},
+           giveni={E\bibinitperiod}}}%
       }
-      \strng{namehash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{fullhash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{fullhashraw}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{bibnamehash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{authorbibnamehash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{authornamehash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{authorfullhash}{ac9174bfaa66e1e444595eecb4019fce}
-      \strng{authorfullhashraw}{ac9174bfaa66e1e444595eecb4019fce}
-      \field{labelalpha}{SRS18}
+      \strng{namehash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{fullhash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{fullhashraw}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{bibnamehash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{authorbibnamehash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{authornamehash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{authorfullhash}{62a09aaab89d736ad6f579d45d236bea}
+      \strng{authorfullhashraw}{62a09aaab89d736ad6f579d45d236bea}
+      \field{labelalpha}{SLCZ09}
       \field{sortinit}{S}
       \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{booktitle}{Short Paper Proceedings of IEEE Pacific Visualization Symposium (PacificVIS)}
-      \field{title}{Visualization of Fullerene Fragmentation}
-      \field{year}{2018}
-      \field{pages}{111\bibrangedash 115}
-      \range{pages}{5}
-      \verb{doi}
-      \verb 10.1109/PacificVis.2018.00022
-      \endverb
+      \field{abstract}{Abstract We introduce a novel, automatic streamline seeding algorithm for vector fields defined on surfaces in 3D space. The algorithm generates evenly spaced streamlines fast, simply and efficiently for any general surface-based vector field. It is general because it handles large, complex, unstructured, adaptive resolution grids with holes and discontinuities, does not require a parametrization, and can generate both sparse and dense representations of the flow. It is efficient because streamlines are only integrated for visible portions of the surface. It is simple because the image-based approach removes the need to perform streamline tracing on a triangular mesh, a process which is complicated at best. And it is fast because it makes effective, balanced use of both the CPU and the GPU. The key to the algorithm's speed, simplicity and efficiency is its image-based seeding strategy. We demonstrate our algorithm on complex, real-world simulation data sets from computational fluid dynamics and compare it with object-space streamline visualizations.}
+      \field{journaltitle}{Computer Graphics Forum}
+      \field{number}{6}
+      \field{title}{Evenly Spaced Streamlines for Surfaces: An Image-Based Approach}
+      \field{volume}{28}
+      \field{year}{2009}
+      \field{pages}{1618\bibrangedash 1631}
+      \range{pages}{14}
+      \keyw{flow visualization,vector field visualization,streamline seeding,surfaces}
     \endentry
-    \entry{Zheng2019equivalence}{article}{}{}
-      \name{author}{4}{}{%
-        {{hash=7d7dd9dace264259be0d2f2ef56c4db2}{%
-           family={Zheng},
-           familyi={Z\bibinitperiod},
-           given={Boyan},
-           giveni={B\bibinitperiod}}}%
-        {{hash=f4220efc57f9db2871e158b72bf9aa38}{%
-           family={Rieck},
-           familyi={R\bibinitperiod},
-           given={Bastian},
-           giveni={B\bibinitperiod}}}%
-        {{hash=5dbe4406fbbbfeeab17ba5e4f21c544e}{%
-           family={Leitte},
-           familyi={L\bibinitperiod},
-           given={Heike},
-           giveni={H\bibinitperiod}}}%
-        {{hash=62f3b42f4d1fa13bfe6d16292baeabc3}{%
-           family={Sadlo},
-           familyi={S\bibinitperiod},
-           given={Filip},
-           giveni={F\bibinitperiod}}}%
+    \entry{TurkBanks}{inproceedings}{}{}
+      \name{author}{2}{}{%
+        {{hash=c651f32f7f9707025c958764a1842afd}{%
+           family={Turk},
+           familyi={T\bibinitperiod},
+           given={Greg},
+           giveni={G\bibinitperiod}}}%
+        {{hash=7ee14d1cb59c816b7c8bde62df1f6a2b}{%
+           family={Banks},
+           familyi={B\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
       }
-      \strng{namehash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{fullhash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{fullhashraw}{3432111a3b16589303a09ce933a1e98a}
-      \strng{bibnamehash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{authorbibnamehash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{authornamehash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{authorfullhash}{3432111a3b16589303a09ce933a1e98a}
-      \strng{authorfullhashraw}{3432111a3b16589303a09ce933a1e98a}
-      \field{labelalpha}{ZRLS19}
-      \field{sortinit}{Z}
-      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{b006825302e263e567138209f64a78c6}
+      \strng{fullhash}{b006825302e263e567138209f64a78c6}
+      \strng{fullhashraw}{b006825302e263e567138209f64a78c6}
+      \strng{bibnamehash}{b006825302e263e567138209f64a78c6}
+      \strng{authorbibnamehash}{b006825302e263e567138209f64a78c6}
+      \strng{authornamehash}{b006825302e263e567138209f64a78c6}
+      \strng{authorfullhash}{b006825302e263e567138209f64a78c6}
+      \strng{authorfullhashraw}{b006825302e263e567138209f64a78c6}
+      \field{labelalpha}{TB96}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{journaltitle}{Computer Graphics Forum}
-      \field{number}{3}
-      \field{title}{Visualization of Equivalence in 2D Bivariate Fields}
-      \field{volume}{38}
-      \field{year}{2019}
-      \field{pages}{311\bibrangedash 323}
-      \range{pages}{13}
+      \field{booktitle}{Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques}
+      \field{isbn}{0897917464}
+      \field{series}{SIGGRAPH '96}
+      \field{title}{Image-guided streamline placement}
+      \field{year}{1996}
+      \field{pages}{453\bibrangedash 460}
+      \range{pages}{8}
       \verb{doi}
-      \verb 10.1111/cgf.13691
+      \verb 10.1145/237170.237285
       \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/237170.237285
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/237170.237285
+      \endverb
+      \keyw{flow visualization,random descent,random optimization,streamline,vector field visualization}
+    \endentry
+    \entry{Verma}{inproceedings}{}{}
+      \name{author}{3}{}{%
+        {{hash=d3e416d70a00d06c53df9dee45edef95}{%
+           family={Verma},
+           familyi={V\bibinitperiod},
+           given={V.},
+           giveni={V\bibinitperiod}}}%
+        {{hash=a98ce8d44a5c44315ac6cbbf352f0565}{%
+           family={Kao},
+           familyi={K\bibinitperiod},
+           given={D.},
+           giveni={D\bibinitperiod}}}%
+        {{hash=7dbae5030b1db2eee4c0645feeeb9300}{%
+           family={Pang},
+           familyi={P\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{791936e801514bf704ea82ec97239ac0}
+      \strng{fullhash}{791936e801514bf704ea82ec97239ac0}
+      \strng{fullhashraw}{791936e801514bf704ea82ec97239ac0}
+      \strng{bibnamehash}{791936e801514bf704ea82ec97239ac0}
+      \strng{authorbibnamehash}{791936e801514bf704ea82ec97239ac0}
+      \strng{authornamehash}{791936e801514bf704ea82ec97239ac0}
+      \strng{authorfullhash}{791936e801514bf704ea82ec97239ac0}
+      \strng{authorfullhashraw}{791936e801514bf704ea82ec97239ac0}
+      \field{labelalpha}{VKP00}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings Visualization 2000. VIS 2000 (Cat. No.00CH37145)}
+      \field{title}{A flow-guided streamline seeding strategy}
+      \field{year}{2000}
+      \field{pages}{163\bibrangedash 170}
+      \range{pages}{8}
+      \verb{doi}
+      \verb 10.1109/VISUAL.2000.885690
+      \endverb
+      \keyw{Streaming media;Visualization;Computer science;NASA}
+    \endentry
+    \entry{wu2009topology}{article}{}{}
+      \name{author}{4}{}{%
+        {{hash=aa7a53be814833cad7f2fbc82d77390c}{%
+           family={Wu},
+           familyi={W\bibinitperiod},
+           given={Keqin},
+           giveni={K\bibinitperiod}}}%
+        {{hash=00ccaf7b1005d063f991128f164104e3}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Zhanping},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=8a44c3dffdeab4748f9387da05b041ac}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Song},
+           giveni={S\bibinitperiod}}}%
+        {{hash=243496fce117f4ba9037968932b9797f}{%
+           family={Moorhead\bibnamedelima II},
+           familyi={M\bibinitperiod\bibinitdelim I\bibinitperiod},
+           given={Robert\bibnamedelima J},
+           giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{fullhash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{fullhashraw}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{bibnamehash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{authorbibnamehash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{authornamehash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{authorfullhash}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \strng{authorfullhashraw}{3cc1aecfa08f6fc7a67bc5d2488353a6}
+      \field{labelalpha}{WLZM09}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Visualization and Computer Graphics}
+      \field{number}{5}
+      \field{title}{Topology-aware evenly spaced streamline placement}
+      \field{volume}{16}
+      \field{year}{2009}
+      \field{pages}{791\bibrangedash 801}
+      \range{pages}{11}
     \endentry
   \enddatalist
 \endrefsection

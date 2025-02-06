@@ -1,5 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Implementation}
+\label[section]{sec:implementation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 This chapter briefly mentions the used libraries, and focuses on the initial implementation of - and iterative additions to - the proposed algorithm.
 \section{Libraries}
@@ -11,54 +12,74 @@ The algorithm is implemented in Python3.10, and heavily relies on three librarie
 \end{itemize}
 
 \section{Time Coherent Algorithm Implementation}
-Using the "Visualization Tool Kit (VTK)" and the "Parallel Viewer (ParaView)" comes with some caveats,
-but also several benefits due to the broad spectrum of available algorithms.
-The most important components used are briefly listed in the following chapter,
-the final picture of the algorithm design is delivered afterwards in subsection 5.2.2,
-and we conclude this chapter with a complexity analysis in subsection 5.2.3.
+Using the ``Visualization Tool Kit (VTK)'' and the ``Parallel Viewer (ParaView)'' provides a broad spectrum of available algorithms.
+The most important components used are briefly listed in the following section,
+the final algorithm design is delivered afterwards in \Cref{sec:impdesign},
+and we conclude this chapter with a complexity analysis in \Cref{sec:impcomplexity}.
 
 \subsection{Vital External Software Components}
-\begin{description}
-    \item [VTK Pipeline] While an extremely involved topic with dozens of hours to be spent on reading, this can be summarized as follows:
-    The VTK pipeline consists of three types of objects: Sources, filters, and sinks. Sources create data, filters modify it, and sinks display it.
-    Each object has input and output ports, how many of which it has decides its membership of one of the above groups.
-    A simple workflow to visualize a vector field would be: Vector Field Source $\rightarrow$ Line Geometry Generation $\rightarrow$ Line Rendering.
-    \item [vtkPythonAlgorithm] This class is intended as a base class for writing custom algorithms in either of the three categories.
-    We use this twice: Once for a group of vector field sources to test our implementation with, and for the algorithm itself.
-    In the former case, we use it as a source, in the latter as a filter. The relevant method in this class is called "RequestData", which is passed an information object.
-    We can modify this object in order to pass data forward (and backward, though we do not need this) through the pipeline.
-    \item [vtkImageData] Objects of type vtkImageData hold a grid defined by 2 3-vectors: The extents (number of points in each direction), and the spacing (how far points are apart in X/Y/Z direction).
-    Every point on this rectilinear grid can have scalars or other objects assigned, like a 3D vector containing velocity.
-    In our case, we use it exactly in this way: Every point is assigned a velocity, which are then interpolated as needed.
-    \item [vtkStreamTracer] The vtkStreamTracer class is a filter with two inputs: We provide it with a vector field (vtkImageData) object and a point, which it then integrates through the field.
-    The relevant output for us is the list of points making up the streamline that it returns.
-\end{description}
-
+\label[section]{sec:impvital}
+\paragraph*{VTK Pipeline} While an extremely involved topic with dozens of hours to be spent on reading,
+we try to summarize it as follows:
+The VTK pipeline consists of three types of objects: Sources, filters, and sinks. Sources create data, filters modify it, and sinks display it.
+Each object has input and output ports, how many of which it has decides its membership of one of the above groups.
+A simple workflow to visualize a vector field would be: Vector Field Source $\rightarrow$ Line Geometry Generation $\rightarrow$ Screen Rendering.
+\paragraph*{vtkPythonAlgorithm} This class is intended as a base class for writing custom algorithms in either of the three categories.
+We use this twice: Once for a group of vector field sources to test our implementation with, and for the algorithm itself.
+In the former case, we use it as a source, in the latter as a filter. The relevant method in this class is called "RequestData", which is passed an information object.
+We can modify this object in order to pass data forward (and backward, though we do not need this) through the pipeline.
+\paragraph*{vtkImageData} Objects of type vtkImageData hold a grid defined by 2 3-vectors: The extents (number of points in each direction), and the spacing (how far points are apart in X/Y/Z direction).
+Every point on this rectilinear grid can have scalars or other objects assigned, like a velocity as a 3D vector.
+In our case, we use it exactly in this way:
+Points are assigned velocities, which are then interpolated as needed.
+\paragraph*{vtkStreamTracer} The vtkStreamTracer class is a filter with two inputs: We provide it with a vector field (vtkImageData) object and a point, which it then integrates through the field.
+The relevant output for us is the list of points making up the streamline that it returns.
+\newpage
 \subsection{Algorithm Design}
+\label[section]{sec:impdesign}
 Since we need two filters ($L_s, L_t$), and want them to act on different time steps, we have decided to implement the filtering and drawing subsystem as follows:
-\begin{description}
-   \item[FilterTarget]s are effectively images, something with 2D pixel data that can e.g. contain the brightness of the image that guides our algorithm.
-   \item[Painter]s act as a modifying actor for FilterTargets. Painters use a configuration (line brightness, blur size, etc.) and draw polylines to the FilterTargets accordingly.
-   \item[Filter] objects contain a list of lines that make up the vector field image, and orchestrate the assigned Painters and their respective configs.
-   They also provide methods for adding/removing/modifying lines, using a given energy function to determine their success.
-   \item[FilterStack]: This class is best used (though not enforced) as a singleton; it manages two filter objects, one for each time step.
-   It also provides the energy methods as lambdas to the new filter added every time step.
-\end{description}
-This change compared to the original was necessary, because we now want to manage multiple filters from different time frames at the same time.
-It is even possible to make the filter change the further back in time it was created, e.g. to not only use time coherence w.r.t the last frame,
-or to allow onion skinning of older frames' low pass images.
-\noindent
-The entry point for this algorithm is, as with any VTKPythonAlgorithm, the "RequestData" (we leave out the other Request... calls for brevity) method.
-We are provided the vector field via the VTKImageData object as input, and start to set up our low-pass filter stack.
-By providing a filter with a config (the standard config uses similar values as Turk and Banks' implementation), we set up the $E_s$ part.
-If we are not interested in time coherence, this is all that is necessary for a line to be drawn filter-wise.
-Otherwise, we simply add another config specialized to work well with $E_t$, so our filter now has two configs, painters, and targets: One for $E_s$, one for $E_t$.
-Drawing the lines themselves is done using NumPy's vectorization, since we can use the NumPy-compatible vtkDataSetAdapter (DSA).
-We use this to quickly obtain and transform the coordinates obtained from the vktStreamTarcer.
+\paragraph*{FilterTarget} Effectively a wrapper for an image, allowing easier access to some properties.
+It contains the brightness information of the image that guides our algorithm.
+\paragraph*{Painter} This is the modifying actor for FilterTargets.
+Painters use a configuration (line brightness, blur size, etc.)
+and draw poly lines to the FilterTargets accordingly. This is how we distinguish between $L_t$'s and $L_s$'s radii.
+\paragraph*{Filter} These objects contain a list of lines that make up the vector field image,
+and orchestrate the assigned Painters and their respective configuration objects.
+They also provide methods for adding/removing/modifying lines,
+using a given energy function to determine their success.
+They act as the binding agent for the logic modifying line placement and actually performing the change.
+\paragraph*{FilterStack} This class is best used (though not enforced) as a singleton;
+it manages two filter objects, one for the current,  and one for the last time step.
+It also provides the energy methods as lambdas to the new filter added every time step.
+
+This change compared to the original was necessary,
+because we now want to manage multiple filters from different time frames at the same time.
+It is even possible to make the filter change depending on how long ago it was created,
+e.g. to not only use time coherence w.r.t the last frame,
+or to allow effects like onion skinning of older frames' low pass images.
+
+The entry point for this algorithm is, as with any vtkPythonAlgorithm,
+the ``RequestData'' method (we leave out the other Request() methods for brevity).
+We are provided the vector field via the vtkImageData object as input,
+and start to set up our low-pass filter stack.
+
+By setting up a filter with a config
+(the standard config uses similar values as Turk and Banks' implementation), we create the $E_s$ part.
+If we are not interested in time coherence,
+this is all that is necessary for a line to be drawn filter-wise.
+Otherwise, we simply add another config specialized to work well with $E_t$,
+so our filter now has two configs, painters, and targets: One for $E_s$, one for $E_t$.
+
+Drawing the lines themselves is done using NumPy's vectorization,
+since we can use the NumPy-compatible vtkDataSetAdapter (DSA).
+We use this to quickly obtain and transform the coordinates returned from the vktStreamTracer.
 The drawing process is handled entirely by the Painter objects:
-For a line $L$ containing $n$ seeds, we calculate the bounding boxes of $n-1$ segments, padded by the filter radius.
-Each pixel inside this rectangle has a number of vectorized calculations performed in order to determine its brightness.
-The brightness is evaluated using a precomputed grayscale table which we interpolate via SciPy's RegularGridInterpolator, as this also supports vectorized access.
+For a line $L$ containing $n$ seeds, we calculate the bounding boxes of $n-1$ segments,
+padded by the filter radius.
+Each pixel inside this rectangle has a number of vectorized calculations
+performed in order to determine its brightness.
+The brightness is evaluated using a precomputed grayscale table which we
+interpolate via SciPy's RegularGridInterpolator, as this also supports vectorized access.
 Once each segment's pixels are computed, we simply add them to the global line image.
 
 Having finished the drawing process, we now look at the energy measure.
@@ -69,27 +90,29 @@ Therefore, we simply leave the argument bound to "None" when passing it to the f
 
 
 \subsection{Complexity Analysis}
-The whole algorithm depends on a single parameter called the \textit{separation distance}, which we write as $d$.
-$5/6 \cdot 2 / d$ is used to calculate the size of the low pass filter, with typical ranges of $d$ being $[0.01, 0.04]$,
-referring to 1-10\% of the screen width. For simplicity, we assume the screen shape to be square.
-\\\\\textit{This probably terrible. How to do it properly?}\\\\
-We can therefore write the total number of pixels in the low pass filter as $25/36 \dot 4 / d^2 \in O(d^{-2})$.
+\label[section]{sec:impcomplexity}
+\paragraph*{Line Integration}
+We heavily rely on the vtkStreamTracer (see \Cref{sec:impvital}),
+which we configured to use the Runge-Kutta-4 solver.
+RK4 uses a complexity of $O(n)$, with $n$ being the number of integration steps taken.
+Hence, obtaining the sample points of a single streamline of length $n$ is of complexity $O(n)$.
 
-For a single time step, we draw $L$ lines. Each line contains $S$ segments, or $S+1$ points.
-Let $B$ be the typical size of a bounding box in pixels, then we have to compute about $L \cdot S \cdot B^2$ pixels.
-Note that "pixels" in the low-pass filter have nothing to do with those used to represent the final lines.
-Due to the delayed rasterization, it is sufficient to use a low pass image of size 32x32px to compute an image about 12x12 line spacings across.
+\paragraph*{Drawing a Line Segment}
+When computing the footprint of a streamline, we do so segment by segment.
+A segment footprint's pixel count $f$ is defined by two values:
+The filter radius $r$ and the maximum step length $l$.
+The maximum cost of drawing a segment is therefore a constant, and we write this cost as $c$.
 
-Assuming an image size of one, and the typical line length to be one with a step size of 0.005, we get about
-$S=200$ segments for a single line.
+\paragraph*{Drawing a Line}
+If the line consists of $n$ segments each costing a maximum of $c$, the cost is simply $O(n)$.
+This remains unchanged when including the cost of integration, as we still get $O(2n) = O(n)$.
 
-With a filter of size 32x32 and a filter radius of 6px (giving us a spacing of about 12 lines per side), so let
-$B=\lceil0.005 * 32\rceil + 2 \cdot 6 = 13$.
-This means we end up with $200 * 13^2 = 33,800$ pixels to be calculated for a single line.
-Every move operation causes the entire line to be re-evaluated, and the most relevant operations are moves, as they are what relaxes the image and makes lines grow past each other.
-A lengthen operation can increase the length by a maximum of 4\% of the image width, averaging at about 2\%.
-Therefore, at least 25 redraws are needed, with earlier redraws being much cheaper, since the line is shorter.
-
-Generating simple images like the ones used in this thesis can take up to 5 minutes, twice as long if we use multiple painters like when enabling coaxing.
-The strongest factor impacting runtime is the number of integration steps, as the application of the individual footprints is still implemented "loopy", without vectorization.
-
+\paragraph*{Generating a Streamline}
+Lines start at very low length, and need to grow and shift, causing them to be redrawn over and over.
+Generating a single line by letting it grow means we re-evaluate it as often as necessary.
+We need to draw $O(0.5\cdot n^2)=O(n^2)$ segments to reach a length of $n$,
+combining this with the cost of drawing a length-$n$ line, we arrive at $O(cn^2)=O(n^2)$.
+\\\\
+The randomized operations all cause a line to be re-generated, but since its length remains, this is done
+with $O(n)$. However, we do this fairly often, making the complexity w.r.t. segment size and iteration count
+behave as if it were quadratic.

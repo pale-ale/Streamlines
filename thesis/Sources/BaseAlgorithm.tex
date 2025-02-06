@@ -13,43 +13,50 @@
         \caption*{(b)}
     \end{subfigure}
     \caption{
-        (a): Lines placed with seeds on a regular grid.
-        (b): The same lines after optimization through seed shifting. Notice the more even grayscale image in the center and on the sides.
-        Both images contain 130 lines, with a length of 10\% of the screen width each.}
+        (a) Short streamlines placed with seeds on a regular grid.
+        (b) Same streamlines after optimization through seed shifting. Notice the more even grayscale image in the center and on the sides.
+        Both images contain 130 streamlines, with a length of 10\,\% of the screen width each.}
     \label[figure]{fig:tbwaves}
 \end{figure}
 
-In this chapter, we introduce the image-guided streamline placement algorithm developed by Greg Turk and David Banks.
-The algorithm forms a more suitable basis for time coherence due to how it reacts to changes to specific lines.
-More specifically, it retains a good amount of control regarding the line placement and length,
-while still allowing the lines to move and relax the spacing between them.
+In this chapter, we introduce the image-guided streamline placement
+algorithm developed by Greg Turk and David Banks \cite{TurkBanks}.
+The algorithm forms a more suitable basis for time coherence due to how it reacts to changes to single streamlines.
+It retains a good amount of control regarding the streamline placement and length,
+while still allowing the streamlines to move and relax the spacing between them.
 
 \subsection{Overview}
-The following section will be about the three core components that make up the image-guided sections of the algorithm: the lines themselves, the low-pass filter, and the energy measure.
-The filter is used to create a blurred image of the streamlines,
-where the lines themselves are brighter, and empty spaces darker (\cref{fig:tbwaves}(a)).
-An optimal line placement w.r.t. density (neither too crowded, nor too sparse) is reached when the low-pass image has roughly the same gray coloring everywhere.
+The following section will be about the three core components that make up the image-guided
+sections of the algorithm: the streamlines themselves, the low-pass filter, and the energy measure.
+The filter creates blurred images of the streamlines,
+where pixels close to the streamline are brighter, and empty spaces darker (\Cref{fig:tbwaves}(a)).
+An optimal streamline placement w.r.t. density (neither too crowded, nor too sparse)
+is reached when the low-pass image has roughly the same gray coloring everywhere.
 We can intuitively define the energy measure as the squared differences of the blurred image from
 a uniform grayscale background, also referred to as the \textit{target brightness}.
-Simply knowing the energy however is not enough, we need to be able to manipulate the line placement effectively in order to minimize it.
-This is achieved by using various randomized changes to the position (\cref{fig:tbwaves}(b)), length, or number of streamlines, and is described in greater detail in section 4.2.3.
+Simply knowing the energy however is not enough, we need to be able to manipulate
+the streamline placement effectively in order to minimize it.
+This is achieved using various randomized changes to the position (\Cref{fig:tbwaves}(b)), length,
+or number of streamlines, and is described in greater detail in \Cref{sec:tbmove}.
 Whenever a change leads to a decrease in energy, the change is accepted and, if not, reverted.
 
 \subsection{Energy Measure}
-The method used by Turk and Banks defines three important components to measure image quality as the sum of deviations of a low-pass image from a uniform greyscale target.
+The method used by Turk and Banks defines three important components to measure image quality as the
+sum of deviations of a low-pass blurred image (fundamentals, \Cref{sec:IP}) from a uniform grayscale target.
 \begin{enumerate}
-    \item The first component is a collection of (straight) line segments from each line,
-    each of which can be converted to a line formula of the form $Ax + By - C = 0$.
-    They refer to the image defined by these purely analytical lines as $I$, however this image is never actually created and exists purely implicitly.
+    \item The first component is a collection of straight line segments from each streamline,
+    each of which are converted to a line formula of the form $Ax + By - C = 0$.
+    They refer to the image defined by these purely analytical line segments as $I$,
+    however this image is never actually created and exists purely implicitly.
     \begin{equation*}
         I(x,y) = \begin{cases}
-            1, \kern4em & \text{pixel lies on line}\\
+            1, \kern4em & \text{pixel lies on streamline}\\
             0,          & \text{else}
     \end{cases}
     \end{equation*}
     
     \item The second component is the low-pass filter $L$.
-    It uses a kernel to generate the filtered image of a line.
+    It uses a kernel to generate the filtered image of a streamline.
     Given a falloff distance $R$ and $r=\sqrt{x^2+y^2} / R$, the kernel is defined as:
     \begin{equation*}
         K(x,y) = \begin{cases}
@@ -60,37 +67,43 @@ The method used by Turk and Banks defines three important components to measure 
     Every pixel within the bounding box of a segment + filter diameter has its brightness altered according to this kernel.
     Due to the implementation of the convolution and the scaling of the filter brightness, it is guaranteed that every pixel reaches a maximum brightness of 1.
     This is invariant w.r.t. the number or length of segments as long as only a single,
-    straight line section is considered.
-    Conversely, the only way to get a brightness grater than one is either via a curve in the line or two lines being next to each other.
-    This is immensely useful, as it allows two lines to get close to each other from the ends, 
-    but not from the sides (\cref{fig:tbwaves}(b)).
+    straight streamline section is considered.
+    Conversely, the only way to get a brightness greater than one is either via a curve in the streamline or
+    two streamlines being too close to each other.
+    This is immensely useful, as it allows two streamlines to get close to each other from the ends, 
+    but not from the sides (\Cref{fig:tbwaves}(b)).
     
-    \item In order to determine the energy of the image generated by the kernel application,
-    the following expression (called the \textit{energy function}) is used:
-    \begin{equation*}
-        E(I) = \int_x\int_y\left[(L\ast I)(x,y)-t\right]^2\,dx\,dy
-    \end{equation*}
+    \item In order to determine the brightness, also referred to as the \textit{energy}
+    of the image generated by the kernel application,
+    the following expression is used as the \textit{energy function}:
+    \begin{equation}
+        E(I) = \int_x\int_y\left[(L\ast I)(x,y)-t\right]^2\,\text{d}x\,\text{d}y
+    \end{equation}
     With $t$ referring to the \textit{target brightness}, in their source code the number one is used.
 \end{enumerate}
 It is pivotal for this energy measure to react to minimal changes for the algorithm to successfully converge.
-Therefore, this algorithm does \textit{not} use a simple rasterization and blur technique, as the initial discretization/rasterization
-of the line would remove too much information, even when using anti-aliasing or other more sophisticated rasterization techniques like Bresenham's line algorithm.
-While we discuss the actual implementation in chapter 5, the takeaway here is that the line remains in its analytical form as segments between points.
+Therefore, this algorithm does \textit{not} use a simple rasterization and blur technique,
+as the initial discretization/rasterization
+of the streamline would remove too much information, even when using anti-aliasing or
+other more sophisticated rasterization techniques like Bresenham's line algorithm.
+While we discuss the actual implementation in chapter 5, the takeaway here is that the streamline
+remains in its analytical form as segments between points.
 Then, every point inside the bounding box around every line segment calculates its brightness
-based on the line equation, not by simply blurring pixels on the line, leading to much higher sensitivity.
+based on the line equation, not by simply blurring pixels on the streamline, leading to much higher sensitivity.
 
 \subsection{Randomized Optimizations}
+\label[section]{sec:tbmove}
 Turk and Banks define six actions:
 \begin{itemize}
-    \item \textbf{Insert, Delete:} Add or remove a line from the image.
-    \item \textbf{Lengthen, Shorten:} In-/Decrease the length of a line on one or both ends.
-    \item \textbf{Combine:} Join two lines head-to-tail.
-    \item \textbf{Move:} Translate the seed of a line by a small distance.
+    \item \textbf{Insert, Delete:} Add or remove a streamline from the image.
+    \item \textbf{Lengthen, Shorten:} In-/Decrease the length of a streamline on one or both ends.
+    \item \textbf{Combine:} Join two streamlines head-to-tail.
+    \item \textbf{Move:} Translate the seed of a streamline by a small distance.
 \end{itemize}
-These actions are selected randomly with random parameters, then applied to a random line.
+These actions are selected randomly with random parameters, then applied to a random streamline.
 The algorithm terminates after an energy range was reached, or accepted changes become rare enough to not introduce changes anymore.\\
 If the change was deemed beneficial according to a decrease in energy, it is accepted, otherwise the changes are reverted.
-This causes a "drift" of the lines toward a more uniform energy level.
-Naturally, this depends heavily on the choice of $t$. If $t$ were to be chosen closer to 2,
-the image would become very crowded to reach the increased target gray level.
+This causes a "drift" of the streamlines toward a more uniform energy level.
+Naturally, this depends heavily on the choice of $t$. If $t$ were to be chosen closer to two,
+the image would become crowded by many streamlines to reach the increased target gray level.
 \newpage

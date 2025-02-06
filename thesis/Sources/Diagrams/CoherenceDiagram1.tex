@@ -1,5 +1,12 @@
 \begin{tikzpicture}
-    \begin{axis} [every axis plot post/.append style={ultra thick, mark=none}, xlabel=]
+    \begin{axis} [
+        width=9cm,
+        height=4cm,
+        every axis plot post/.append style={ultra thick, mark=none},
+        xlabel=,
+        ylabel=,
+        x tick scale label style={},
+    ]
         % Separate        
         \addplot +[smooth] [color=blue] coordinates {
             (0, 14007.826)
@@ -206,7 +213,7 @@
             (98, 12798.14)
             (99, 12798.14)
         };
-        \addlegendentry{(d)'s spatial energy}
-        \addlegendentry{(e)'s spatial energy}
+        \addlegendentry{(a)'s spatial energy}
+        \addlegendentry{(b)'s spatial energy}
     \end{axis}
 \end{tikzpicture}

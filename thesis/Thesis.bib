@@ -1,63 +1,117 @@
-@inproceedings{Hanser2019energy,
-  title     = { Energy-Based Visualization of 2{D} Flow Fields },
-  author    = { Hanser, Karsten and Meggendorfer, Stefan and H\"ugel, Peter and Fallenb\"uchel, Florian and Fahad, Hafiz Muhammad and Sadlo, Filip },
-  booktitle = { Proceedings of International Conference on Information Visualization Theory and Applications (IVAPP) },
-  pages     = { 250-258 },
-  year      = { 2019 },
-  doi       = { 10.5220/0007359602500258 },
+% Image-Guided
+@inproceedings{TurkBanks,
+  author = {Turk, Greg and Banks, David},
+  title = {Image-guided streamline placement},
+  year = {1996},
+  isbn = {0897917464},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/237170.237285},
+  doi = {10.1145/237170.237285},
+  booktitle = {Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques},
+  pages = {453–460},
+  numpages = {8},
+  keywords = {flow visualization, random descent, random optimization, streamline, vector field visualization},
+  series = {SIGGRAPH '96}
 }
 
-@conference{TurkBanks,
-    key   = { SIGGRAPH 1996 },
-    title = { Image-Guided Streamline Placement },
-    year  = { 1996 }
+@ARTICLE{8093671,
+  author={Li, Liya and Shen, Han-Wei},
+  journal={IEEE Transactions on Visualization and Computer Graphics}, 
+  title={Image-based streamline generation and rendering}, 
+  year={2007},
+  volume={13},
+  number={3},
+  pages={630-640},
+  keywords={Streaming media;Three-dimensional displays;Two dimensional displays;Rendering (computer graphics);Visualization;Aerospace electronics;Data visualization;Three-dimensional flow visualization;streamlines;streamline seeding;level of detail;depth peeling;stylized rendering},
+  doi={10.1109/TVCG.2007.8093671}
 }
 
-@article{Hofmann2019dependentVectors,
-  title     = { The Dependent Vectors Operator },
-  author    = { Hofmann, Lutz and Sadlo, Filip },
-  journal   = { Computer Graphics Forum },
-  volume    = { 38 },
-  number    = { 3 },
-  pages     = { 261--272 },
-  year      = { 2019 },
-  doi       = { 10.1111/cgf.13687 },
+@article{https://doi.org/10.1111/j.1467-8659.2009.01352.x,
+  author = {Spencer, Benjamin and Laramee, Robert S. and Chen, Guoning and Zhang, Eugene},
+  title = {Evenly Spaced Streamlines for Surfaces: An Image-Based Approach},
+  journal = {Computer Graphics Forum},
+  volume = {28},
+  number = {6},
+  pages = {1618-1631},
+  keywords = {flow visualization, vector field visualization, streamline seeding, surfaces},
+  %doi = {https://doi.org/10.1111/j.1467-8659.2009.01352.x},
+  %url = {https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8659.2009.01352.x},
+  %eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-8659.2009.01352.x},
+  abstract = {Abstract We introduce a novel, automatic streamline seeding algorithm for vector fields defined on surfaces in 3D space. The algorithm generates evenly spaced streamlines fast, simply and efficiently for any general surface-based vector field. It is general because it handles large, complex, unstructured, adaptive resolution grids with holes and discontinuities, does not require a parametrization, and can generate both sparse and dense representations of the flow. It is efficient because streamlines are only integrated for visible portions of the surface. It is simple because the image-based approach removes the need to perform streamline tracing on a triangular mesh, a process which is complicated at best. And it is fast because it makes effective, balanced use of both the CPU and the GPU. The key to the algorithm's speed, simplicity and efficiency is its image-based seeding strategy. We demonstrate our algorithm on complex, real-world simulation data sets from computational fluid dynamics and compare it with object-space streamline visualizations.},
+  year = {2009}
 }
 
-@article{Sagrista2019GaiaSky,
-  title     = { {G}aia {S}ky: Navigating the {G}aia Catalog },
-  author    = { Sagrist\`a, Antoni and Jordan, Stefan and M\"uller, Thomas and Sadlo, Filip },
-  journal   = { IEEE Transactions on Visualization and Computer Graphics },
-  volume    = { 25 },
-  number    = { 1 },
-  pages     = { 1070--1079 },
-  year      = { 2019 },
-  doi       = { 10.1109/TVCG.2018.2864508 },
+
+% Feature-Guided
+
+@INPROCEEDINGS{Verma,
+  author={Verma, V. and Kao, D. and Pang, A.},
+  booktitle={Proceedings Visualization 2000. VIS 2000 (Cat. No.00CH37145)}, 
+  title={A flow-guided streamline seeding strategy}, 
+  year={2000},
+  volume={},
+  number={},
+  pages={163-170},
+  keywords={Streaming media;Visualization;Computer science;NASA},
+  doi={10.1109/VISUAL.2000.885690}
 }
 
-@inproceedings{Sdeo2018fullerene,
-  title     = { Visualization of Fullerene Fragmentation },
-  author    = { Sdeo, Kai and Rieck, Bastian and Sadlo, Filip },
-  booktitle = { Short Paper Proceedings of IEEE Pacific Visualization Symposium (PacificVIS) },
-  pages     = { 111--115 },
-  year      = { 2018 },
-  doi       = { 10.1109/PacificVis.2018.00022 },
+@article{wu2009topology,
+  title={Topology-aware evenly spaced streamline placement},
+  author={Wu, Keqin and Liu, Zhanping and Zhang, Song and Moorhead II, Robert J},
+  journal={IEEE Transactions on Visualization and Computer Graphics},
+  volume={16},
+  number={5},
+  pages={791--801},
+  year={2009},
+  publisher={IEEE}
 }
 
-@article{Zheng2019equivalence,
-  title     = { Visualization of Equivalence in 2D Bivariate Fields },
-  author    = { Zheng, Boyan and Rieck, Bastian and Leitte, Heike and Sadlo, Filip },
-  journal   = { Computer Graphics Forum },
-  volume    = { 38 },
-  number    = { 3 },
-  pages     = { 311--323 },
-  year      = { 2019 },
-  doi       = { 10.1111/cgf.13691 },
+% Heuristic
+
+@inproceedings{Mattausch,
+  author = {Mattausch, Oliver and Theußl, Thomas and Hauser, Helwig and Gröller, Eduard},
+  year = {2003},
+  month = {05},
+  pages = {},
+  title = {Strategies for Interactive Exploration of 3D Flow Using Evenly-Spaced Illuminated Streamlines},
+  doi = {10.1145/984952.984987}
 }
 
-@inproceedings{Jung2017tumble,
-  title     = { Tumble-Vortex Core Line Extraction },
-  author    = { Jung, Philipp and Hausner, Philip and Pilz, Lukas and Stern, Julien and Euler, Christian and Riemer, Michael and Sadlo, Filip },
-  booktitle = { Proceedings of SIBGRAPI WVIS },
-  year      = { 2017 },
+@article{Jobard,
+  author = {Jobard, Bruno and Lefer, Wilfrid},
+  year = {1997},
+  month = {12},
+  pages = {},
+  title = {Creating Evenly-Spaced Streamlines of Arbitrary Density},
+  volume = {7},
+  isbn = {978-3-211-83049-9},
+  journal = {Proceedings of the eight Eurographics Workshop on visualization in scientific computing},
+  doi = {10.1007/978-3-7091-6876-9_5}
+}
+
+@INPROCEEDINGS{1532832,
+  author={Mebarki, A. and Alliez, P. and Devillers, O.},
+  booktitle={VIS 05. IEEE Visualization, 2005.}, 
+  title={Farthest point seeding for efficient placement of streamlines}, 
+  year={2005},
+  volume={},
+  number={},
+  pages={479-486},
+  keywords={Streaming media;Visualization;Containers;USA Councils;Image generation;Optimization methods},
+  doi={10.1109/VISUAL.2005.1532832}
+}
+
+
+@ARTICLE{4015453,
+  author={Liu, Zhanping and Moorhead, Robert and Groner, Joe},
+  journal={IEEE Transactions on Visualization and Computer Graphics}, 
+  title={An Advanced Evenly-Spaced Streamline Placement Algorithm}, 
+  year={2006},
+  volume={12},
+  number={5},
+  pages={965-972},
+  keywords={Streaming media;Visualization;Iterative algorithms;Programmable control;Adaptive control;Polynomials;Interpolation;Error correction;Noise robustness;Pixel;Flow visualization;evenly-spaced streamlines;streamline placement;seeding strategy;closed streamlines.},
+  doi={10.1109/TVCG.2006.116}
 }

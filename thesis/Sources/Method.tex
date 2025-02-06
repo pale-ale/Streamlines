@@ -1,10 +1,13 @@
 \chapter{Method}
-In this chapter, we describe the motivation of and concepts used for developing an algorithm supporting time coherence.
-We start with an implementation that was ultimately deemed infeasible in \Cref{sec:failedalg},
-including some mathematical concepts and the reasoning behind foregoing it in favor of a more global approach.
-\Cref{sec:basealg} is about the algorithm we decided on using, with motivation, a concept,
-and finally some implementation ideas for time coherence in \Cref{sec:tcmot}, 
-\Cref{sec:tcdef}, and \Cref{sec:tcalg} respectively.
+\label[section]{sec:method}
+In this chapter, we describe the motivation and concepts used for developing
+an algorithm supporting time coherence.
+We start with an implementation we ultimately deemed infeasible in \Cref{sec:failedalg},
+replacing it with the image-guided version described in \Cref{sec:basealg}.
+\Cref{sec:tcmot} contains the motivation, i.e. why time coherence is beneficial,
+and provide an example for undesirable effects that can appear without it.
+The definition is provided in \Cref{sec:tcdef},
+which we then adapt to our use case and implement in \Cref{sec:tcalg}.
 
 \input{Sources/FailedAlgorithm.tex}
 \input{Sources/BaseAlgorithm}
@@ -22,13 +25,14 @@ and finally some implementation ideas for time coherence in \Cref{sec:tcmot},
         \caption*{(b)}
     \end{subfigure}
     \caption{
-        (a), (b): A vector field undergoing a change over time, increasing the amplitude at its center.
+        (a), (b): A vector field undergoing a change over time, increasing the amplitude at its center, visualized using
+        a hedgehog plot.
         It is described by $u(x,y,t) = (1, \sin(5t\pi x) \text{ if } 0.4 \leq x \leq 0.6 \text{ else } 0)^T$ for $t=1$ and $t=3$ in (a) and (b) respectively.
     }
     \label[figure]{fig:necessary1}
 \end{figure}
 
-\section{Why Time Coherence is Necessary}
+\section{Motivation for Time Coherence}
 \label[section]{sec:tcmot}
 When visualizing a vector field using streamlines, it is desirable to capture the features of the field as accurately as possible.
 For image-based solutions, this means that we are interested in a line placement that poses little to no visual distractions from the general field flow.
@@ -40,12 +44,11 @@ with image-guided approaches favoring the latter.
 A new type of visual artifact is introduced when we add a time axis to our data.
 Where before, this approach could solely focus on optimizing a single image w.r.t. visual criteria, we now have to take into account the movement
 of lines from one time step to another.
-What we are looking for is a line placement that allows large portions of the image to stay the same between two time steps, i.e. the largest possible "overlap" between the two images.
-This new criterion may also counteract the spacial distribution of lines,
-since creating or removing lines will severely impact how the image looks from one time step to the next.\\
-\noindent We can illustrate this behavior using a field like the one defined by \Cref{fig:necessary1}.
-We take a closer look at $u(x,y,t)$ at two time steps, namely $t=1$ and $t=3$.
-The notable change of the field's trajectory from one time step to the next is a strong ridge forming in the center column.
+
+We can illustrate this behavior using the field in \Cref{fig:necessary1},
+taking a closer look at $u(x,y,t)$ at two time steps $t=1$ and $t=3$.
+The notable change of the field's trajectory from one time step to the next
+is a strong ridge forming in the center column.
 
 \newpage
 
@@ -62,21 +65,28 @@ The notable change of the field's trajectory from one time step to the next is a
         \caption*{(b)}
     \end{subfigure}
     \caption{
-        (a): A single streamline seeded exactly at the center of the image at time $t=1$ (black) and $t=3$ (red).
-        (b): The same initial streamline at $t=1$, however the streamline kept the same height in areas of little movement on the left and right at time $t=3$ (green) because the algorithm shifted the seed.
+        A streamline (black) seeded directly at the center for both cases.
+        The colored arrows represent the perceived direction of motion.
+        (a) The streamline mostly drifting downward from time $t=1$ to $t=3$ (red).
+        (b) The same initial streamline at $t=1$, but keeping same height at time $t=3$ (green) because the algorithm shifted the seed.
     }
     \label[figure]{fig:necessary2}
 \end{figure}
-We now look at an intuitive display of a temporal artifact.
-In \Cref{fig:necessary2} (a), we see how the increase in ridge height leads to movement of the whole line,
+We now show how this behavior can lead to a visual artifact when using streamlines as the means of visualization.
+In \Cref{fig:necessary2} (a), we see how the increase in ridge height leads to movement of the whole streamline,
 which is visually irritating as it distracts from the actual feature undergoing the change.
 In fact, it suggests that instead of the center moving upward, the outer regions move downward,
 giving room for misconception of the field's behavior.
-What we want instead, is as little movement as possible, 
-as can be seen in the transition shown in \Cref{fig:necessary2} (b).
-Here, large portions remain stationary, with only segments close to the center rising upwards.
+
+What we are looking for is a line placement strategy that allows large portions of the image to 
+stay the same between two time steps,
+i.e. that achieves the largest possible ``streamline overlap'' between the two images, as shown
+in the transition in \Cref{fig:necessary2} (b).
+Here, large portions remain stationary, with only segments close to the center rising upwards,
+reflecting the localized change much better.
+
 An important factor for the generation of such images is the seed choice.
-We have chosen the same seed in both cases in order to compare the
+We have chosen the same centered seed in both cases in order to compare the
 placement with and without our algorithm optimizing the seed position to respect
 what we define in the next chapter as \textit{time coherence}.
 

@@ -3,20 +3,25 @@
 \begin{center}
   \textsc{Abstract}
 \end{center}
-%
+% Grammarly'd
 \noindent
-A common element used to represent steady vector fields are integral lines capable of showing flow dynamics, called streamlines.
-There are many possible criteria that can be used to define the quality of a set of streamlines when visualizing a vector field.
-Commonly used placement properties include the uniformity and length of the streamlines, with even spacing and maximum length being the preferred choice for high visual appeal.
-
-We have noticed that an important criterion for creating visualizations of $unsteady$ fields, such as animations, is largely unaccounted for.
-Currently, algorithms can only animate a vector field frame-by-frame without actually being time-aware.
-The result is many visually pleasing images, however there is no coherence between each image, as lines are only placed to fulfill the frame-limited optimum.
-
-In this work, an algorithm capable of time coherent streamline placement---that is lines that move as little as possible between frames--- is introduced.
-An image-guided approach based on the work by Turk and Banks will be implemented to generate initial streamline placements according to the above criteria.
-We then introduce modifications to several components.
-The first key change revolves around the energy measure, a function used to define the uniformity of line placement by comparing it with a target brightness.
-Another change is the kernel Turk and Banks use in order to blur the image, which we also adapt for time coherence in combination with a new seeding strategy.
-We show how the individual changes affect the streamline placement locally and globally, and apply the algorithm to various datasets.
+Common elements in visualizing steady vector fields are integral lines that show flow dynamics, called streamlines.
+Many possible criteria can define the quality of a set of streamlines when visualizing a vector field.
+Frequently used placement properties include the uniformity and length of the streamlines, with even spacing and maximum length being the preferred choice for high visual appeal.
+We have noticed that the most relevant criterion for visualizing $unsteady$ fields using e.g.,
+animations, is largely unaccounted for.
+Currently, most algorithms can only animate a vector field frame-by-frame without time-awareness.
+The result is many visually pleasing images lacking coherence between each other,
+as said algorithms place streamlines merely to fulfill the frame-limited optimum.
+We overcome this problem by introducing an algorithm capable of time-coherent streamline placement,
+effectively minimizing streamline movement between frames.
+We implement an image-guided approach based on the work by Greg Turk and David Banks \cite{TurkBanks} to
+generate initial streamline placements according to the above criteria.
+To add time coherence, several key changes to different components are made.
+The first change revolves around the energy measure, a function defining
+the uniformity of streamline placement by comparing it with a target brightness.
+Another change is the kernel Turk and Banks use to blur the image,
+which we adapt to include time coherence, as well as introducing a new seeding strategy.
+We show how the individual changes affect the streamline placement locally and globally,
+and apply the algorithm to various datasets.
 \cleardoublepage

@@ -2373,12 +2373,16 @@
   </bcf:bibdata>
   <bcf:section number="0">
     <bcf:citekey order="1" intorder="1">TurkBanks</bcf:citekey>
-    <bcf:citekey order="2" intorder="1">Hanser2019energy</bcf:citekey>
-    <bcf:citekey order="3" intorder="1">Hofmann2019dependentVectors</bcf:citekey>
-    <bcf:citekey order="4" intorder="1">Jung2017tumble</bcf:citekey>
-    <bcf:citekey order="4" intorder="2">Sagrista2019GaiaSky</bcf:citekey>
-    <bcf:citekey order="4" intorder="3">Sdeo2018fullerene</bcf:citekey>
-    <bcf:citekey order="4" intorder="4">Zheng2019equivalence</bcf:citekey>
+    <bcf:citekey order="2" intorder="1">TurkBanks</bcf:citekey>
+    <bcf:citekey order="3" intorder="1">https://doi.org/10.1111/j.1467-8659.2009.01352.x</bcf:citekey>
+    <bcf:citekey order="4" intorder="1">8093671</bcf:citekey>
+    <bcf:citekey order="5" intorder="1">Verma</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">1532832</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">wu2009topology</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">Jobard</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">4015453</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">Mattausch</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">TurkBanks</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="anyt">

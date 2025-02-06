@@ -1,8 +1,10 @@
 \begin{tikzpicture}
     \begin{axis} [
+        width=9cm,
+        height=4cm,
+        legend style={at={(.98,.8)},anchor=north east},
         every axis plot post/.append style={ultra thick, mark=none}, 
         xlabel=,
-        legend style={at={(.98,.8)},anchor=north east}
     ]
         \addplot +[smooth] [color=blue] coordinates {
             (0, 600.738)
@@ -208,7 +210,7 @@
             (98, 0.216)
             (99, 0.216)   
         };
-        \addlegendentry{(d)'s temp. energy}
-        \addlegendentry{(e)'s temp. energy}
+        \addlegendentry{(a)'s temp. energy}
+        \addlegendentry{(b)'s temp. energy}
     \end{axis}
 \end{tikzpicture}

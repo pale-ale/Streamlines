@@ -5,8 +5,19 @@
 \end{center}
 %
 \selectlanguage{ngerman}
-\noindent \blindtext
-
-\blindtext
+Ziel dieser Arbeit ist das Erreichen von Zeitkohärenz bei Stromlinien
+in zeitabhängigen Vektorfeldern, um deren Darstellung durch z.B. Animationen zu verbessern.
+Wir beginnen mit einer Definition für Zeitkohärenz, die im Wesentlichen auf die
+Bewegung einer Stromlinie von einem Zeitschritt zum nächsten gestützt ist.
+Wenn diese Bewegung groß ausfällt bzw. sich die Stromlinie viel bewegt hat,
+bezeichnen wir dies als ``schlechte Zeitkohärenz''.
+Wir zeigen, warum zeitkohärentes Verhalten wichtig ist für z.B. Animationen,
+und entwickeln eine prototypische Implementierung, deren Parametrisierung
+wir dann anhand einiger Beispiele bestimmen.
+Unser Algorithmus basiert auf einer durch Bild-geleiteten Implementierung von Greg Turk und David Banks,
+den wir durch einige Änderungen an den zentralen Komponenten zeitkohärent gemacht haben.
+Im Anschluss werden einige Datensätze damit ausgewertet und mit anderen einfachen Algorithmen verglichen;
+außerdem beschreiben wir einige Limitierungen sowie Ideen für Verbesserungen.
+Zum Schluss wird eine kurze Komplexitätsanalyse durchgeführt und die Performance untersucht.
 \selectlanguage{english}
 \cleardoublepage

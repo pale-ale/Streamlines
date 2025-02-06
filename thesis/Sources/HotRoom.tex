@@ -1,0 +1,141 @@
+\subsection{Hot Room Dataset}
+
+The final vector field we examine contains 60x30x60 data points.
+Since the dataset is 3D and our algorithm only works in 2D,
+we slice the dataset parallel to the $X,Y$-plane at half height with a $Z$-index of 30.
+Because the field is more chaotic than the algebraic cases we used until now,
+we decided on an iteration limit of 5000 steps compared to 1500 for the other images.
+The comparison is made between our implementation and the base algorithm only,
+as the constant algorithm does not produce useful images beyond the first, and we will show several.
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoom.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoomL.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoomTB1O.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoomOurs1O.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoomTB2O.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/450/HotRoomOurs2O.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \caption{A comparison to how similar each algorithm's streamline image is compared to its previous one.
+        (a, b) are the initial frame's footprint (left) and streamline placement (right) for both algorithms at time step 450.
+        (c) shows the base algorithm's streamline placement (black) at step 451
+        compared to (b)'s streamlines (red).
+        (e) compares step 452 (black), to 451 (red).
+        (d, f) work similarly with our implementation.
+    }
+    \label[figure]{fig:reshotroom450}
+\end{figure}
+
+
+We start with the dataset at timestamp 450, the individual changes shown in \Cref{fig:reshotroom450}.
+It is easy to see the general trend of our implementation and the base algorithm producing images of
+similar quality w.r.t. spatial placement continuing, with our version creating images exhibiting
+much better time coherence.
+
+On the next page, we evaluate the behavior of our implementation when
+we skip a large amount of frames.
+We start at frame 700 and generate the subsequent frame,
+jump to 1000, and generate the next frame again, comparing the results.
+\newpage
+
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/700/HotRoom.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/700/HotRoomL.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/700/HotRoomTB1O.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/700/HotRoomOurs1O.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/1000/TB1O.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/1000/Ours1O.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/1000/TB2O.png}
+            \caption{}
+        \end{subfigure}
+        \begin{subfigure}{.49\textwidth}
+            \centering
+            \includegraphics[scale=.065]{figures/Results/HotRoom/1000/Ours2O.png}
+            \caption{}
+        \end{subfigure}
+    \end{subfigure}
+    \caption{
+        Same image layout as \Cref{fig:reshotroom450}, with a 300 time step jump
+        between the top and bottom four images.
+    }
+    \label[figure]{fig:resfinal}
+\end{figure}
+
+We see that the jump in time steps occurred between \Cref{fig:resfinal} (c) and (e), and (d) and (f),
+as the currently shown streamline after image does not match the afterimage at all.
+Even for this case, our algorithm creates lines adhering well to the spatial criteria,
+with time coherence not achieved in most regions, as is to be expected since most of the field is vastly
+different due to the large time step difference.
+The algorithm quickly recovers from this discrepancy,
+as the next frame has regained most of its time coherence.
