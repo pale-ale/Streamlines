@@ -10,7 +10,7 @@
 %     \end{axis}
 % \end{tikzpicture}
 \begin{tikzpicture}[]
-    \clip[use as bounding box] (0,0) rectangle (\pgfplotswidth,\pgfplotswidth);
+    \clip[use as bounding box] (0,0) rectangle (\pgfplotswidth,.55\pgfplotswidth);
 
     \def\r(#1,#2){(((#1)^2 + (#2)^2) / 2)^0.5}%
     \def\K(#1,#2){2 * \r(#1,#2)^3 - 3 * \r(#1,#2)^2 + 1}
